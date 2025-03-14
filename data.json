@@ -1,0 +1,155 @@
+{
+  "students": [
+    {
+        "id": "mqmrz2mhirs",
+        "name": "Khor Hao En",
+        "instrument": "Drums",
+        "grade": "Advanced",
+        "day": "Tuesday",
+        "time": "19:00",
+        "notes": [
+            {
+                "text": "updated aklsjdflajs;ldf",
+                "date": "12/03/2025"
+            }
+        ]
+    },
+    {
+        "id": "24zpl6vzhft",
+        "name": "Hew Ai Fang",
+        "instrument": "Guitar",
+        "grade": "Beginner",
+        "day": "Wednesday",
+        "time": "20:30",
+        "notes": []
+    },
+    {
+        "id": "2klj34tuerh",
+        "name": "Tan Jay See",
+        "instrument": "Guitar",
+        "grade": "Beginner",
+        "day": "Wednesday",
+        "time": "21:15",
+        "notes": []
+    },
+    {
+        "id": "fn4i1rpsfyp",
+        "name": "Jordan Lim",
+        "instrument": "Drums",
+        "grade": "Beginner",
+        "day": "Wednesday",
+        "time": "19:00",
+        "notes": []
+    },
+    {
+        "id": "j9tbrcdbgg",
+        "name": "Mah Zhi Hong",
+        "instrument": "Drums",
+        "grade": "Grade 3",
+        "day": "Wednesday",
+        "time": "19:45",
+        "notes": []
+    },
+    {
+        "id": "i8cps1hdg5",
+        "name": "Yogan Puter",
+        "instrument": "Guitar",
+        "grade": "Grade 2",
+        "day": "Monday",
+        "time": "16:16",
+        "notes": []
+    },
+    {
+        "id": "y99ncc1enrg",
+        "name": "Tang Yu Shan",
+        "instrument": "Drums",
+        "grade": "Beginner",
+        "day": "Thursday",
+        "time": "17:00",
+        "notes": [
+            {
+                "text": "Cuba Mama - Good next lesson do it without drums sound then can move on.",
+                "date": "13/03/2025"
+            }
+        ]
+    },
+    {
+        "id": "ykiul120ohk",
+        "name": "Arrithran",
+        "instrument": "Guitar",
+        "grade": "Beginner",
+        "day": "Thursday",
+        "time": "17:45",
+        "notes": [
+            {
+                "text": "absent",
+                "date": "13/03/2025"
+            }
+        ]
+    },
+    {
+        "id": "em52tncl8u7",
+        "name": "Tan Ryu Xii Louisa",
+        "instrument": "Drums",
+        "grade": "Beginner",
+        "day": "Thursday",
+        "time": "19:00",
+        "notes": [
+            {
+                "text": "West Coast Rollin' -- open Hit Hat",
+                "date": "13/03/2025"
+            }
+        ]
+    },
+    {
+        "id": "lls5p1dqfh",
+        "name": "Woo Jin Quan",
+        "instrument": "Drums",
+        "grade": "Beginner",
+        "day": "Thursday",
+        "time": "19:45",
+        "notes": [
+            {
+                "text": "Kaiser Roll 85% - speed not stable",
+                "date": "13/03/2025"
+            }
+        ]
+    },
+    {
+        "id": "szgk3c956el",
+        "name": "Maxenne Lim",
+        "instrument": "Guitar",
+        "grade": "Grade 1",
+        "day": "Thursday",
+        "time": "20:30",
+        "notes": [
+            {
+                "text": "The unforgiven -- corrected finger accordin to fret\nLet it be  -- Chord sound need improvement\nSomeone like you -- plucking finger corrected",
+                "date": "13/03/2025"
+            }
+        ]
+    },
+    {
+        "id": "hcw398fzckk",
+        "name": "Lee Bo Sean",
+        "instrument": "Guitar",
+        "grade": "Beginner",
+        "day": "Thursday",
+        "time": "21:15",
+        "notes": [
+            {
+                "text": "GEM - 我的秘密",
+                "date": "13/03/2025"
+            }
+        ]
+    }
+],
+  "settings": {
+    "instruments": [
+        "Guitar",
+        "Drums",
+        "Piano",
+        "Vocal"
+    ]
+}
+}
