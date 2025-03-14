@@ -153,10 +153,43 @@ export const useStudentStore = create<StudentState>()(
       })),
       
       generateStudentId: () => {
-        return Math.random().toString(36).substring(2, 12);
+        const state = get();
+        
+        // Use a combination of timestamp, random string, and counter for uniqueness
+        const timestamp = Date.now().toString(36);
+        const randomStr = Math.random().toString(36).substring(2, 10);
+        const counter = state.students.length.toString(36);
+        
+        // Combine all parts to create a unique ID
+        const id = `${timestamp}-${randomStr}-${counter}`;
+        
+        // Double-check that this ID is unique
+        const isUnique = !state.students.some(student => student.id === id);
+        
+        // In the extremely unlikely case of a collision, add more randomness
+        if (!isUnique) {
+          return `${timestamp}-${randomStr}-${counter}-${Math.random().toString(36).substring(2, 6)}`;
+        }
+        
+        return id;
       },
       
       createStudent: ({ name, instrument, grade, day, time, contact, currentMaterial }) => {
+        const state = get();
+        
+        // Check if a student with the same name, instrument, day and time already exists
+        const existingStudent = state.students.find(student => 
+          student.name === name && 
+          student.instrument === instrument && 
+          student.day === day && 
+          student.time === time
+        );
+        
+        if (existingStudent) {
+          console.warn('A student with the same details already exists');
+          return existingStudent;
+        }
+        
         const id = get().generateStudentId();
         const newStudent = {
           id,

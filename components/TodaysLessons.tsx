@@ -6,6 +6,8 @@ import { useUIStore } from '@/store/useUIStore'
 
 export default function TodaysLessons() {
   const { getTodaysLessons } = useStudentSelectors()
+  
+  // Get today's lessons - already sorted by time in the useStudentSelectors hook
   const todaysLessons = getTodaysLessons()
   
   const setCurrentStudentId = useStudentStore(state => state.setCurrentStudentId)
@@ -17,24 +19,24 @@ export default function TodaysLessons() {
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4">Today's Lessons</h2>
+    <div className="bg-white dark:bg-black rounded-lg shadow-md p-6 transition-colors duration-200">
+      <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">Today's Lessons</h2>
       
       {todaysLessons.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-gray-700 dark:text-gray-300">
           No lessons scheduled for today.
         </div>
       ) : (
-        <ul className="divide-y divide-gray-200">
+        <ul className="divide-y divide-gray-200 dark:divide-gray-800">
           {todaysLessons.map(student => (
             <li 
               key={student.id} 
-              className="py-3 flex justify-between items-center hover:bg-gray-50 px-2 rounded cursor-pointer"
+              className="py-3 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 px-2 rounded cursor-pointer transition-colors"
               onClick={() => openStudentProfile(student.id)}
             >
               <div>
-                <h3 className="text-lg font-medium text-gray-900">{student.name}</h3>
-                <div className="text-sm text-gray-500">
+                <h3 className="text-lg font-medium text-black dark:text-white">{student.name}</h3>
+                <div className="text-sm text-gray-800 dark:text-gray-300">
                   {student.time} | {student.instrument}
                 </div>
               </div>

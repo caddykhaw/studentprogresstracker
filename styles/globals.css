@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme color variables */
+:root {
+  /* Primary colors */
+  --color-primary: #3b82f6; /* blue-500 */
+  --color-primary-light: #60a5fa; /* blue-400 */
+  --color-primary-dark: #2563eb; /* blue-600 */
+  
+  /* Background colors */
+  --color-bg-light: #f9fafb; /* gray-50 */
+  --color-bg-dark: #111827; /* gray-900 */
+  
+  /* Text colors */
+  --color-text-light: #f9fafb; /* gray-50 */
+  --color-text-dark: #111827; /* gray-900 */
+  --color-text-muted-light: #9ca3af; /* gray-400 */
+  --color-text-muted-dark: #6b7280; /* gray-500 */
+  
+  /* Border colors */
+  --color-border-light: #e5e7eb; /* gray-200 */
+  --color-border-dark: #374151; /* gray-700 */
+  
+  /* Error colors */
+  --color-error: #ef4444; /* red-500 */
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-primary: #60a5fa; /* blue-400 */
+  --color-primary-light: #93c5fd; /* blue-300 */
+  --color-primary-dark: #3b82f6; /* blue-500 */
+}
+
 /* Custom styles migrated from original styles.css */
 h1 {
   text-shadow: 1px 1px #000000;

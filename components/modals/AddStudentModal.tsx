@@ -65,7 +65,7 @@ export default function AddStudentModal() {
     
     if (!validateForm()) return
     
-    const newStudent = createStudent({
+    createStudent({
       name: formData.name.trim(),
       instrument: formData.instrument,
       grade: formData.grade.trim(),
@@ -75,7 +75,6 @@ export default function AddStudentModal() {
       currentMaterial: formData.currentMaterial.trim()
     })
     
-    addStudent(newStudent)
     handleClose()
   }
   
@@ -99,8 +98,8 @@ export default function AddStudentModal() {
     <Modal isOpen={isOpen} onClose={handleClose} title="Add New Student">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Name <span className="text-red-500">*</span>
+          <label htmlFor="name" className="block text-sm font-medium text-text-dark dark:text-text-light">
+            Name <span className="text-error">*</span>
           </label>
           <input
             type="text"
@@ -108,24 +107,24 @@ export default function AddStudentModal() {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-              errors.name ? 'border-red-500' : ''
+            className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
+              errors.name ? 'border-error' : ''
             }`}
           />
-          {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+          {errors.name && <p className="mt-1 text-sm text-error">{errors.name}</p>}
         </div>
         
         <div>
-          <label htmlFor="instrument" className="block text-sm font-medium text-gray-700">
-            Instrument <span className="text-red-500">*</span>
+          <label htmlFor="instrument" className="block text-sm font-medium text-text-dark dark:text-text-light">
+            Instrument <span className="text-error">*</span>
           </label>
           <select
             id="instrument"
             name="instrument"
             value={formData.instrument}
             onChange={handleChange}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-              errors.instrument ? 'border-red-500' : ''
+            className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
+              errors.instrument ? 'border-error' : ''
             }`}
           >
             <option value="">Select an instrument</option>
@@ -135,36 +134,47 @@ export default function AddStudentModal() {
               </option>
             ))}
           </select>
-          {errors.instrument && <p className="mt-1 text-sm text-red-600">{errors.instrument}</p>}
+          {errors.instrument && <p className="mt-1 text-sm text-error">{errors.instrument}</p>}
         </div>
         
         <div>
-          <label htmlFor="grade" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="grade" className="block text-sm font-medium text-text-dark dark:text-text-light">
             Grade/Level
           </label>
-          <input
-            type="text"
+          <select
             id="grade"
             name="grade"
             value={formData.grade}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="e.g., Beginner, Intermediate, Grade 5"
-          />
+            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary"
+          >
+            <option value="">Select a grade/level</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Grade 1">Grade 1</option>
+            <option value="Grade 2">Grade 2</option>
+            <option value="Grade 3">Grade 3</option>
+            <option value="Grade 4">Grade 4</option>
+            <option value="Grade 5">Grade 5</option>
+            <option value="Grade 6">Grade 6</option>
+            <option value="Grade 7">Grade 7</option>
+            <option value="Grade 8">Grade 8</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
         </div>
         
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="day" className="block text-sm font-medium text-gray-700">
-              Lesson Day <span className="text-red-500">*</span>
+            <label htmlFor="day" className="block text-sm font-medium text-text-dark dark:text-text-light">
+              Lesson Day <span className="text-error">*</span>
             </label>
             <select
               id="day"
               name="day"
               value={formData.day}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                errors.day ? 'border-red-500' : ''
+              className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
+                errors.day ? 'border-error' : ''
               }`}
             >
               {days.map(day => (
@@ -173,12 +183,12 @@ export default function AddStudentModal() {
                 </option>
               ))}
             </select>
-            {errors.day && <p className="mt-1 text-sm text-red-600">{errors.day}</p>}
+            {errors.day && <p className="mt-1 text-sm text-error">{errors.day}</p>}
           </div>
           
           <div>
-            <label htmlFor="time" className="block text-sm font-medium text-gray-700">
-              Lesson Time <span className="text-red-500">*</span>
+            <label htmlFor="time" className="block text-sm font-medium text-text-dark dark:text-text-light">
+              Lesson Time <span className="text-error">*</span>
             </label>
             <input
               type="time"
@@ -186,16 +196,16 @@ export default function AddStudentModal() {
               name="time"
               value={formData.time}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                errors.time ? 'border-red-500' : ''
+              className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
+                errors.time ? 'border-error' : ''
               }`}
             />
-            {errors.time && <p className="mt-1 text-sm text-red-600">{errors.time}</p>}
+            {errors.time && <p className="mt-1 text-sm text-error">{errors.time}</p>}
           </div>
         </div>
         
         <div>
-          <label htmlFor="contact" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="contact" className="block text-sm font-medium text-text-dark dark:text-text-light">
             Contact Information
           </label>
           <input
@@ -204,13 +214,13 @@ export default function AddStudentModal() {
             name="contact"
             value={formData.contact}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary"
             placeholder="Phone number or email"
           />
         </div>
         
         <div>
-          <label htmlFor="currentMaterial" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="currentMaterial" className="block text-sm font-medium text-text-dark dark:text-text-light">
             Current Material
           </label>
           <textarea
@@ -219,7 +229,7 @@ export default function AddStudentModal() {
             value={formData.currentMaterial}
             onChange={handleChange}
             rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary"
             placeholder="Books, pieces, or exercises the student is working on"
           />
         </div>
@@ -228,13 +238,13 @@ export default function AddStudentModal() {
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="rounded-md border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark px-4 py-2 text-sm font-medium text-text-dark dark:text-text-light shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bg-dark"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="rounded-md border border-transparent bg-primary hover:bg-primary-dark px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bg-dark"
           >
             Add Student
           </button>
