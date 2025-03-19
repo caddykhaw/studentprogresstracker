@@ -5,6 +5,33 @@ import { useStudentStore } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
 import Modal from './Modal'
 
+// CSS variables for standardization
+const styles = {
+  button: {
+    primary: "rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+    secondary: "rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+    danger: "text-red-600 hover:text-red-800",
+  },
+  section: {
+    title: "text-lg font-semibold text-gray-900 dark:text-white mb-4",
+    subtitle: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
+    container: "space-y-6",
+    divider: "border-t border-gray-200 dark:border-gray-700 pt-5 mt-2",
+  },
+  input: {
+    base: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
+    error: "border-red-500",
+  },
+  listItem: "flex justify-between items-center bg-gray-50 p-2 rounded",
+  text: {
+    error: "mt-1 text-sm text-red-600",
+    muted: "text-gray-500 italic",
+  },
+  spacing: {
+    standard: "space-x-3",
+  }
+}
+
 export default function SettingsModal() {
   const isOpen = useUIStore(state => state.settingsModalOpen)
   const setIsOpen = useUIStore(state => state.setSettingsModalOpen)
@@ -59,7 +86,7 @@ export default function SettingsModal() {
         } else {
           alert('Invalid data format')
         }
-      } catch (error) {
+      } catch (error: any) {
         alert('Failed to import data: ' + error.message)
       }
     }
@@ -78,9 +105,9 @@ export default function SettingsModal() {
   
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Settings">
-      <div className="space-y-6">
+      <div className={styles.section.container}>
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Instruments</h3>
+          <h3 className={styles.section.title}>Instruments</h3>
           
           <div className="flex items-start mb-4">
             <div className="flex-grow mr-2">
@@ -91,34 +118,34 @@ export default function SettingsModal() {
                   setNewInstrument(e.target.value)
                   if (error) setError('')
                 }}
-                className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                  error ? 'border-red-500' : ''
+                className={`${styles.input.base} ${
+                  error ? styles.input.error : ''
                 }`}
                 placeholder="Add new instrument..."
               />
-              {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+              {error && <p className={styles.text.error}>{error}</p>}
             </div>
             <button
               type="button"
               onClick={handleAddInstrument}
-              className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className={styles.button.primary}
             >
               Add
             </button>
           </div>
           
           <div className="mt-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Current Instruments:</h4>
+            <h4 className={styles.section.subtitle}>Current Instruments:</h4>
             {settings.instruments.length === 0 ? (
-              <p className="text-gray-500 italic">No instruments added yet</p>
+              <p className={styles.text.muted}>No instruments added yet</p>
             ) : (
               <ul className="space-y-2">
                 {settings.instruments.map(instrument => (
-                  <li key={instrument} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                  <li key={instrument} className={styles.listItem}>
                     <span>{instrument}</span>
                     <button
                       onClick={() => handleDeleteInstrument(instrument)}
-                      className="text-red-600 hover:text-red-800"
+                      className={styles.button.danger}
                     >
                       Delete
                     </button>
@@ -129,40 +156,40 @@ export default function SettingsModal() {
           </div>
         </div>
         
-        <div className="border-t pt-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Data Management</h3>
+        <div className={styles.section.divider}>
+          <h3 className={`${styles.section.title} text-xl`}>Data Management</h3>
           
-          <button
-            type="button"
-            onClick={handleExportData}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Export Data
-          </button>
+          <div className={`flex ${styles.spacing.standard}`}>
+            <button
+              type="button"
+              onClick={handleExportData}
+              className={styles.button.secondary}
+            >
+              Export Data
+            </button>
+            
+            <button
+              type="button"
+              onClick={openFileDialog}
+              className={styles.button.secondary}
+            >
+              Import Data
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportData}
+              accept="application/json"
+              style={{ display: 'none' }}
+            />
+          </div>
         </div>
         
-        <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={openFileDialog}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Import Data
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImportData}
-            accept="application/json"
-            style={{ display: 'none' }}
-          />
-        </div>
-        
-        <div className="flex justify-end pt-4 border-t">
+        <div className={`flex justify-end ${styles.section.divider}`}>
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className={styles.button.primary}
           >
             Close
           </button>
