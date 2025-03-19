@@ -29,8 +29,10 @@ interface StudentState {
   settings: Settings
   currentStudentId: string | null
   currentNoteIndex: number | null
+  isLoading: boolean  // Add loading state
   
   // Actions
+  fetchStudents: () => Promise<void>
   setStudents: (students: Student[]) => void
   setSettings: (settings: Settings) => void
   setCurrentStudentId: (id: string | null) => void
@@ -57,8 +59,39 @@ export const useStudentStore = create<StudentState>()(
       },
       currentStudentId: null,
       currentNoteIndex: null,
+      isLoading: false,
       
-      setStudents: (students) => set({ students }),
+      // Fetch students from API
+      fetchStudents: async () => {
+        try {
+          set({ isLoading: true });
+          console.log('🔄 Fetching students from API...');
+          
+          const response = await fetch('/api/students');
+          if (!response.ok) {
+            throw new Error('Failed to fetch students');
+          }
+          const students = await response.json();
+          console.log('📥 Received students from API:', students);
+          
+          if (!Array.isArray(students)) {
+            console.error('❌ API returned invalid data format:', students);
+            set({ isLoading: false });
+            return;
+          }
+          
+          set({ students, isLoading: false });
+        } catch (error) {
+          console.error('❌ Error fetching students:', error);
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+      
+      setStudents: (students) => {
+        console.log('✏️ Setting students:', students);
+        set({ students });
+      },
       
       setSettings: (settings) => set({ settings }),
       
@@ -66,9 +99,12 @@ export const useStudentStore = create<StudentState>()(
       
       setCurrentNoteIndex: (index) => set({ currentNoteIndex: index }),
       
-      addStudent: (student) => set((state) => ({ 
-        students: [...state.students, student] 
-      })),
+      addStudent: (student) => {
+        console.log('➕ Adding new student:', student);
+        set((state) => ({ 
+          students: [...state.students, student] 
+        }));
+      },
       
       updateStudent: (updatedStudent) => set((state) => {
         const index = state.students.findIndex(s => s.id === updatedStudent.id);
@@ -247,14 +283,50 @@ export const useStudentSelectors = () => {
   };
   
   const getTodaysLessons = () => {
-    const { students } = store;
+    const { students, isLoading } = store;
     if (typeof window === 'undefined') return [];
     
+    // Get the current date in the local timezone
+    const now = new Date();
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const today = days[new Date().getDay()];
-    return students
-      .filter(student => student.day === today)
+    const today = days[now.getDay()];
+    
+    console.log('🕒 System time:', {
+      raw: now.toString(),
+      utc: now.toUTCString(),
+      local: now.toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' }),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      currentDay: today,
+      dayIndex: now.getDay()
+    });
+    
+    console.log('📚 Students state:', {
+      total: students.length,
+      isLoading,
+      hasData: students && students.length > 0,
+      studentDays: students.map(s => ({ name: s.name, day: s.day }))
+    });
+    
+    if (isLoading) {
+      console.log('⏳ Still loading students...');
+      return [];
+    }
+    
+    if (!students || students.length === 0) {
+      console.log('⚠️ No students data available');
+      return [];
+    }
+    
+    const todaysStudents = students
+      .filter(student => {
+        const matches = student.day.toLowerCase() === today.toLowerCase();
+        console.log(`🔍 Checking student ${student.name}: day=${student.day}, today=${today}, matches=${matches}`);
+        return matches;
+      })
       .sort((a, b) => a.time.localeCompare(b.time));
+    
+    console.log('📅 Today\'s students:', todaysStudents);
+    return todaysStudents;
   };
   
   return {
