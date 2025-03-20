@@ -5,7 +5,7 @@ import { useStudentStore, useStudentSelectors } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
 import Header from '@/components/Header'
 import StudentList from '@/components/StudentList'
-import TodaysLessons from '@/components/TodaysLessons'
+import TodaySchedule from '@/components/TodaySchedule'
 import AddStudentModal from '@/components/modals/AddStudentModal'
 import EditStudentModal from '@/components/modals/EditStudentModal'
 import StudentProfileModal from '@/components/modals/StudentProfileModal'
@@ -108,7 +108,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left column: Today's Lessons */}
           <div className="md:col-span-1">
-            <TodaysLessons />
+            <TodaySchedule />
           </div>
           
           {/* Right column: Student List */}
