@@ -40,10 +40,11 @@ export default function SettingsModal() {
   
   const [newInstrument, setNewInstrument] = useState('')
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   
-  const handleAddInstrument = () => {
+  const handleAddInstrument = async () => {
     if (!newInstrument.trim()) {
       setError('Instrument name is required')
       return
@@ -56,14 +57,32 @@ export default function SettingsModal() {
       return
     }
     
-    addInstrument(trimmedInstrument)
-    setNewInstrument('')
-    setError('')
+    setIsLoading(true)
+    try {
+      await addInstrument(trimmedInstrument)
+      setNewInstrument('')
+      setError('')
+    } catch (error) {
+      setError('Failed to add instrument. Please try again.')
+      console.error('Error adding instrument:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
   
-  const handleDeleteInstrument = (instrument: string) => {
-    if (window.confirm(`Are you sure you want to delete "${instrument}"?`)) {
-      deleteInstrument(instrument)
+  const handleDeleteInstrument = async (instrument: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${instrument}"?`)) {
+      return
+    }
+    
+    setIsLoading(true)
+    try {
+      await deleteInstrument(instrument)
+    } catch (error) {
+      alert('Failed to delete instrument. Please try again.')
+      console.error('Error deleting instrument:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
   
@@ -128,9 +147,10 @@ export default function SettingsModal() {
             <button
               type="button"
               onClick={handleAddInstrument}
-              className={styles.button.primary}
+              className={`${styles.button.primary} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isLoading}
             >
-              Add
+              {isLoading ? 'Adding...' : 'Add'}
             </button>
           </div>
           
@@ -145,9 +165,10 @@ export default function SettingsModal() {
                     <span>{instrument}</span>
                     <button
                       onClick={() => handleDeleteInstrument(instrument)}
-                      className={styles.button.danger}
+                      className={`${styles.button.danger} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={isLoading}
                     >
-                      Delete
+                      {isLoading ? 'Deleting...' : 'Delete'}
                     </button>
                   </li>
                 ))}

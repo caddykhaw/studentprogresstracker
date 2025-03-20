@@ -170,23 +170,71 @@ export const useStudentStore = create<StudentState>()(
         return { students: newStudents };
       }),
       
-      addInstrument: (instrument) => set((state) => {
+      addInstrument: async (instrument) => {
+        const state = get();
+        
         if (state.settings.instruments.includes(instrument)) return state;
         
-        return {
-          settings: {
-            ...state.settings,
-            instruments: [...state.settings.instruments, instrument]
+        const newInstruments = [...state.settings.instruments, instrument];
+        
+        try {
+          // Update MongoDB
+          const response = await fetch('/api/settings', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ instruments: newInstruments }),
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to update settings in database');
           }
-        };
-      }),
-      
-      deleteInstrument: (instrument) => set((state) => ({
-        settings: {
-          ...state.settings,
-          instruments: state.settings.instruments.filter(i => i !== instrument)
+          
+          // Update local state only after successful API call
+          set({
+            settings: {
+              ...state.settings,
+              instruments: newInstruments
+            }
+          });
+        } catch (error) {
+          console.error('Failed to update instruments:', error);
+          throw error;
         }
-      })),
+      },
+      
+      deleteInstrument: async (instrument) => {
+        const state = get();
+        
+        const newInstruments = state.settings.instruments.filter(i => i !== instrument);
+        
+        try {
+          // Update MongoDB
+          const response = await fetch('/api/settings', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ instruments: newInstruments }),
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to update settings in database');
+          }
+          
+          // Update local state only after successful API call
+          set({
+            settings: {
+              ...state.settings,
+              instruments: newInstruments
+            }
+          });
+        } catch (error) {
+          console.error('Failed to update instruments:', error);
+          throw error;
+        }
+      },
       
       generateStudentId: () => {
         const state = get();

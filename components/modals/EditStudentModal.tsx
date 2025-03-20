@@ -203,16 +203,42 @@ export default function EditStudentModal() {
             <label htmlFor="time" className="block text-sm font-medium text-text-dark dark:text-text-light">
               Lesson Time <span className="text-error">*</span>
             </label>
-            <input
-              type="time"
-              id="time"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
-                errors.time ? 'border-error' : ''
-              }`}
-            />
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                id="hour"
+                name="hour"
+                value={formData.time.split(':')[0] || ''}
+                onChange={(e) => {
+                  const hour = e.target.value.padStart(2, '0')
+                  const currentMinute = formData.time.split(':')[1] || '00'
+                  setFormData(prev => ({ ...prev, time: `${hour}:${currentMinute}` }))
+                }}
+                className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary`}
+              >
+                <option value="">Hour</option>
+                {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                  <option key={hour} value={hour.toString().padStart(2, '0')}>
+                    {hour.toString().padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+              <select
+                id="minute"
+                name="minute"
+                value={formData.time.split(':')[1] || ''}
+                onChange={(e) => {
+                  const currentHour = formData.time.split(':')[0] || '00'
+                  setFormData(prev => ({ ...prev, time: `${currentHour}:${e.target.value}` }))
+                }}
+                className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary`}
+              >
+                <option value="">Min</option>
+                <option value="00">00</option>
+                <option value="15">15</option>
+                <option value="30">30</option>
+                <option value="45">45</option>
+              </select>
+            </div>
             {errors.time && <p className="mt-1 text-sm text-error">{errors.time}</p>}
           </div>
         </div>
