@@ -1160,6 +1160,10 @@ select {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
+.bg-gray-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
+}
 .p-2 {
   padding: 0.5rem;
 }
@@ -1491,6 +1495,11 @@ h2 {
   background-color: var(--color-primary-dark);
 }
 
+.hover\:bg-gray-300:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:text-black:hover {
   --tw-text-opacity: 1;
   color: rgb(0 0 0 / var(--tw-text-opacity, 1));
@@ -1755,6 +1764,10 @@ h2 {
 
 .dark\:focus\:ring-offset-bg-dark:focus:is(.dark *) {
   --tw-ring-offset-color: var(--color-bg-dark);
+}
+
+.dark\:focus\:ring-offset-gray-900:focus:is(.dark *) {
+  --tw-ring-offset-color: #111827;
 }
 
 @media (min-width: 640px) {

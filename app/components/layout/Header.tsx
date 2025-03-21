@@ -1,5 +1,5 @@
 import { useUIStore } from '@/store/useUIStore'
-import ThemeToggle from '@/app/components/ui/ThemeToggle'
+import { ThemeToggle } from '@/app/components/ui/ThemeToggle'
 
 export default function Header() {
   const setSettingsModalOpen = useUIStore(state => state.setSettingsModalOpen)
