@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
+  // swcMinify is no longer needed in Next.js 15 as it's the default
   // Suppress the warning about the cz-shortcut-listen attribute
   // This attribute is added by the Commitizen extension
   compiler: {

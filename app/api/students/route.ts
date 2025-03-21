@@ -1,67 +1,83 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import { Student } from '@/store/useStudentStore';
+import { Student } from '@/lib/types';
+import { z } from 'zod';
 
+// Basic student validation schema
+const studentSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  instrument: z.string().min(1, 'Instrument is required'),
+  grade: z.string().min(1, 'Grade is required'),
+  day: z.string().min(1, 'Day is required'),
+  time: z.string().min(1, 'Time is required'),
+  contact: z.string().optional(),
+  currentMaterial: z.string().optional(),
+});
+
+// No-cache headers
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0'
+};
+
+// GET all students
 export async function GET() {
-  console.log('📥 GET /api/students - Starting request...');
-  
   try {
-    console.log('🔌 Connecting to MongoDB...');
+    console.log('📋 Fetching all students');
     const { db } = await connectToDatabase();
     
-    console.log('📚 Fetching students from database...');
-    const students = await db.collection('students').find({}).toArray();
+    const students = await db.collection<Student>('students').find({}).toArray();
     
-    console.log(`✅ Successfully fetched ${students.length} students`);
-    return NextResponse.json(students, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
-    });
+    return NextResponse.json(students, { headers: NO_CACHE_HEADERS });
   } catch (error) {
-    console.error('❌ Error in GET /api/students:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    console.error('❌ Error fetching students:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch students', details: errorMessage },
-      { status: 500 }
+      { error: 'Failed to fetch students' },
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
 
-export async function POST(request: Request) {
-  console.log('📤 POST /api/students - Starting request...');
-  
+// POST new student
+export async function POST(request: NextRequest) {
   try {
-    const { db } = await connectToDatabase();
-    const student = await request.json();
+    console.log('➕ Creating new student');
+    const body = await request.json();
     
-    // Validate required fields
-    if (!student.name || !student.day || !student.time || !student.instrument || !student.grade) {
+    // Validate request body
+    const validationResult = studentSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
+        { error: 'Validation error', details: validationResult.error.errors },
+        { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
     
-    console.log('💾 Inserting new student:', student);
-    const result = await db.collection('students').insertOne(student);
+    const { db } = await connectToDatabase();
     
-    if (!result.acknowledged) {
-      throw new Error('Failed to insert student');
-    }
+    // Create new student object
+    const newStudent: Student = {
+      id: crypto.randomUUID(),
+      ...validationResult.data,
+      notes: [],
+      attendance: 'Present',
+      lastActive: 'Today',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     
-    return NextResponse.json({ 
-      message: 'Student created successfully',
-      id: result.insertedId 
-    }, { status: 201 });
-  } catch (error) {
-    console.error('❌ Error in POST /api/students:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    await db.collection<Student>('students').insertOne(newStudent);
+    
     return NextResponse.json(
-      { error: 'Failed to create student', details: errorMessage },
-      { status: 500 }
+      { message: 'Student created successfully', student: newStudent },
+      { status: 201, headers: NO_CACHE_HEADERS }
+    );
+  } catch (error) {
+    console.error('❌ Error creating student:', error);
+    return NextResponse.json(
+      { error: 'Failed to create student' },
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 } 

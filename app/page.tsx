@@ -3,14 +3,16 @@
 import { useEffect, useState } from 'react'
 import { useStudentStore, useStudentSelectors } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
-import Header from '@/components/Header'
-import StudentList from '@/components/StudentList'
-import TodaySchedule from '@/components/TodaySchedule'
-import AddStudentModal from '@/components/modals/AddStudentModal'
-import EditStudentModal from '@/components/modals/EditStudentModal'
-import StudentProfileModal from '@/components/modals/StudentProfileModal'
-import SettingsModal from '@/components/modals/SettingsModal'
-import { StatsSection } from './lib/AppComponents'
+import { 
+  Header, 
+  StudentList, 
+  TodaySchedule, 
+  AddStudentModal, 
+  EditStudentModal, 
+  StudentProfileModal, 
+  SettingsModal,
+  StatsSection 
+} from './lib/AppComponents'
 
 export default function Home() {
   // Client-side only rendering
@@ -22,6 +24,7 @@ export default function Home() {
   const students = useStudentStore(state => state.students)
   const isLoading = useStudentStore(state => state.isLoading)
   const fetchStudents = useStudentStore(state => state.fetchStudents)
+  const fetchInstruments = useStudentStore(state => state.fetchInstruments)
   
   // Calculate students today based on your data model
   const todaysLessons = useStudentSelectors().getTodaysLessons()
@@ -45,6 +48,11 @@ export default function Home() {
         // Fetch initial data
         console.log('📚 Fetching initial student data...')
         await fetchStudents()
+        
+        // Fetch instruments data from API
+        console.log('🎸 Fetching instruments data...')
+        await fetchInstruments()
+        
         console.log('✅ Initial data fetch complete')
       } catch (error) {
         console.error('❌ Error fetching initial data:', error)

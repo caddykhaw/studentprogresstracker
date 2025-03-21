@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import StatsSection from '../components/StatsSection';
-import ThemeToggle from '../components/ThemeToggle';
+import StatsSection from '../features/dashboard/StatsSection';
+import ThemeToggle from '../components/ui/ThemeToggle';
 
 // Mock student data - replace with actual data fetching
 interface Student {

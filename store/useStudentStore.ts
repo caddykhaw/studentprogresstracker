@@ -30,9 +30,11 @@ interface StudentState {
   currentStudentId: string | null
   currentNoteIndex: number | null
   isLoading: boolean  // Add loading state
+  instrumentsLoading: boolean  // Add loading state for instruments
   
   // Actions
   fetchStudents: () => Promise<void>
+  fetchInstruments: () => Promise<void>  // Add new function
   setStudents: (students: Student[]) => void
   setSettings: (settings: Settings) => void
   setCurrentStudentId: (id: string | null) => void
@@ -55,11 +57,45 @@ export const useStudentStore = create<StudentState>()(
     (set, get) => ({
       students: [],
       settings: {
-        instruments: ['Guitar', 'Drums', 'Piano', 'Violin', 'Bass']
+        instruments: []  // Initialize as empty array instead of hardcoded values
       },
       currentStudentId: null,
       currentNoteIndex: null,
       isLoading: false,
+      instrumentsLoading: false,  // Initialize instruments loading state
+      
+      // Fetch instruments from API
+      fetchInstruments: async () => {
+        try {
+          set({ instrumentsLoading: true });
+          console.log('🎸 Fetching instruments from API...');
+          
+          const response = await fetch('/api/instruments');
+          if (!response.ok) {
+            throw new Error('Failed to fetch instruments');
+          }
+          const instruments = await response.json();
+          console.log('📥 Received instruments from API:', instruments);
+          
+          if (!Array.isArray(instruments)) {
+            console.error('❌ API returned invalid data format:', instruments);
+            set({ instrumentsLoading: false });
+            return;
+          }
+          
+          set(state => ({
+            settings: {
+              ...state.settings,
+              instruments
+            },
+            instrumentsLoading: false
+          }));
+        } catch (error) {
+          console.error('❌ Error fetching instruments:', error);
+          set({ instrumentsLoading: false });
+          throw error;
+        }
+      },
       
       // Fetch students from API
       fetchStudents: async () => {
@@ -170,23 +206,65 @@ export const useStudentStore = create<StudentState>()(
         return { students: newStudents };
       }),
       
-      addInstrument: (instrument) => set((state) => {
-        if (state.settings.instruments.includes(instrument)) return state;
+      addInstrument: (instrument) => {
+        const state = get();
+        if (state.settings.instruments.includes(instrument)) return;
         
-        return {
+        // Update local state immediately for responsive UI
+        set((state) => ({
           settings: {
             ...state.settings,
             instruments: [...state.settings.instruments, instrument]
           }
-        };
-      }),
+        }));
+        
+        // Then sync with API (fire and forget)
+        fetch('/api/instruments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ instrument }),
+        }).catch(error => {
+          console.error('❌ Error adding instrument to API:', error);
+          // Revert the state change if API call fails
+          set((state) => ({
+            settings: {
+              ...state.settings,
+              instruments: state.settings.instruments.filter(i => i !== instrument)
+            }
+          }));
+        });
+      },
       
-      deleteInstrument: (instrument) => set((state) => ({
-        settings: {
-          ...state.settings,
-          instruments: state.settings.instruments.filter(i => i !== instrument)
-        }
-      })),
+      deleteInstrument: (instrument) => {
+        const state = get();
+        
+        // Store the current instruments for potential rollback
+        const currentInstruments = [...state.settings.instruments];
+        
+        // Update local state immediately for responsive UI
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            instruments: state.settings.instruments.filter(i => i !== instrument)
+          }
+        }));
+        
+        // Then sync with API (fire and forget)
+        fetch(`/api/instruments?instrument=${encodeURIComponent(instrument)}`, {
+          method: 'DELETE',
+        }).catch(error => {
+          console.error('❌ Error deleting instrument from API:', error);
+          // Revert the state change if API call fails
+          set((state) => ({
+            settings: {
+              ...state.settings,
+              instruments: currentInstruments
+            }
+          }));
+        });
+      },
       
       generateStudentId: () => {
         const state = get();

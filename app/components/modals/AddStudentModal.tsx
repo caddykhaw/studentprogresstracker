@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useUIStore } from '@/store/useUIStore'
-import { useStudentStore } from '@/store/useStudentStore'
+import { useUIStore } from '../../store/useUIStore'
+import { useStudentStore } from '../../store/useStudentStore'
 import { Dialog } from '@headlessui/react'
-import { StudentCreate } from '@/app/lib/types'
+import { Student } from '../../../lib/types'
 
 export default function AddStudentModal() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -20,7 +20,7 @@ export default function AddStudentModal() {
     console.log('📝 Starting form submission process...')
     
     const formData = new FormData(e.currentTarget)
-    const studentData: StudentCreate = {
+    const studentData: Partial<Student> = {
       name: formData.get('name') as string,
       grade: formData.get('grade') as string,
       attendance: '100%',

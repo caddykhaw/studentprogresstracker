@@ -1,3 +1,27 @@
+// Define the app configuration type
+interface AppConfig {
+  title: string;
+  theme: {
+    dark: boolean;
+    colors: {
+      primary: string;
+      secondary: string;
+      accent: string;
+      error: string;
+    }
+  };
+  ui: {
+    notifications: {
+      position: string;
+    }
+  }
+}
+
+// Helper function to define app configuration
+function defineAppConfig(config: AppConfig): AppConfig {
+  return config;
+}
+
 export default defineAppConfig({
   title: 'Student Progress Tracker',
   theme: {
