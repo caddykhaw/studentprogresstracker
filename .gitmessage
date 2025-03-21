@@ -1,0 +1,23 @@
+# <type>(<scope>): <short summary>
+#   │       │             │
+#   │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
+#   │       │
+#   │       └─⫸ Commit Scope: Optional, can be anything specifying the scope of the commit change.
+#   │                          For example: auth, student, teacher, lessons, etc.
+#   │
+#   └─⫸ Commit Type: feat|fix|docs|style|refactor|perf|test|chore
+#                     feat: A new feature
+#                     fix: A bug fix
+#                     docs: Documentation only changes
+#                     style: Changes that do not affect the meaning of the code
+#                     refactor: A code change that neither fixes a bug nor adds a feature
+#                     perf: A code change that improves performance
+#                     test: Adding missing tests or correcting existing tests
+#                     chore: Changes to the build process or auxiliary tools and libraries
+
+# OPTIONAL body: Should include the motivation for the change and contrast this with previous behavior.
+# Use imperative, present tense: "change" not "changed" nor "changes"
+
+# OPTIONAL footer: Include a closes/fixes #issue-number or breaking changes.
+# For breaking changes: BREAKING CHANGE: <description of the change>
+# Closes #123, #456 
