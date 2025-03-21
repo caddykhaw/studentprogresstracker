@@ -1,19 +1,49 @@
-import { MongoClient } from 'mongodb'
-import * as dotenv from 'dotenv'
-
-// Load environment variables from .env.local and .env
-dotenv.config({ path: '.env.local' })
-dotenv.config({ path: '.env' })
+import { MongoClient, MongoClientOptions } from 'mongodb'
 
 const uri = process.env.MONGODB_URI
 if (!uri) {
-  throw new Error('Please add your Mongo URI to .env.local')
+  throw new Error('Please add your MongoDB URI to .env.local')
 }
 
-const options = {}
+const options: MongoClientOptions = {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 15000,
+  socketTimeoutMS: 60000,
+  connectTimeoutMS: 15000,
+  retryWrites: true,
+  retryReads: true,
+  w: 1,
+}
 
-let client: MongoClient
+let client
 let clientPromise: Promise<MongoClient>
+let connectionRetries = 0
+const MAX_RETRIES = 3
+
+// Function to create new client with connection retry logic
+const createClient = async (): Promise<MongoClient> => {
+  try {
+    console.log('🔌 Initializing MongoDB connection...')
+    const newClient = new MongoClient(uri, options)
+    return await newClient.connect().then(client => {
+      console.log('✅ MongoDB connection established successfully')
+      connectionRetries = 0 // Reset retry counter on success
+      return client
+    })
+  } catch (error) {
+    connectionRetries++
+    console.error(`❌ MongoDB connection error (attempt ${connectionRetries}/${MAX_RETRIES}):`, error)
+    
+    if (connectionRetries < MAX_RETRIES) {
+      console.log(`🔄 Retrying connection in 1 second...`)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return createClient()
+    }
+    
+    console.error('❌ Maximum connection retries reached')
+    throw error
+  }
+}
 
 if (process.env.NODE_ENV === 'development') {
   // In development mode, use a global variable so that the value
@@ -23,27 +53,25 @@ if (process.env.NODE_ENV === 'development') {
   }
 
   if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options)
-    globalWithMongo._mongoClientPromise = client.connect()
+    globalWithMongo._mongoClientPromise = createClient()
   }
   clientPromise = globalWithMongo._mongoClientPromise
 } else {
   // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options)
-  clientPromise = client.connect()
+  clientPromise = createClient()
 }
 
 export async function connectToDatabase() {
   try {
-    if (!clientPromise) {
-      throw new Error('MongoDB client promise is not initialized')
-    }
-    
     const client = await clientPromise
-    const db = client.db('student-progress-tracker')
+    const db = client.db()
     return { client, db }
   } catch (error) {
-    console.error('Failed to connect to MongoDB:', error)
-    throw error
+    console.error('❌ Failed to connect to database:', error)
+    throw new Error('Database connection failed: ' + (error instanceof Error ? error.message : String(error)))
   }
-} 
+}
+
+// Export a module-scoped MongoClient promise. By doing this in a
+// separate module, the client can be shared across functions.
+export default clientPromise 

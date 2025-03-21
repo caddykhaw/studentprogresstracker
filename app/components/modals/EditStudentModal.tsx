@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useStudentStore } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
 import { useSettingsStore } from '@/store/useSettingsStore'
-import { Student, Note } from '@/lib/types'
 import Modal from './Modal'
 
-export default function AddStudentModal() {
-  const isOpen = useUIStore(state => state.isAddStudentModalOpen)
-  const closeModal = useUIStore(state => state.closeAddStudentModal)
+export default function EditStudentModal() {
+  const isOpen = useUIStore(state => state.isEditStudentModalOpen)
+  const closeModal = useUIStore(state => state.closeEditStudentModal)
+  const selectedStudentId = useUIStore(state => state.selectedStudentId)
   
-  const { addStudent } = useStudentStore()
+  const { updateStudent, students } = useStudentStore()
   const { instruments } = useSettingsStore()
   
   const [formData, setFormData] = useState({
@@ -25,12 +25,34 @@ export default function AddStudentModal() {
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
-  
-  // Add loading state for better UX
   const [isLoading, setIsLoading] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  // Load current student data when modal opens - with optimization
+  useEffect(() => {
+    if (isOpen && selectedStudentId) {
+      const student = students.find(s => s.id === selectedStudentId)
+      if (student) {
+        // Use a timeout to prevent layout thrashing during modal transition
+        const timerId = setTimeout(() => {
+          setFormData({
+            name: student.name,
+            instrument: student.instrument || '',
+            grade: student.grade || '',
+            day: student.day || 'Monday',
+            time: student.time || '',
+            contact: student.contact || '',
+            currentMaterial: student.currentMaterial || ''
+          })
+        }, 50) // Small delay to avoid layout thrashing
+        
+        return () => clearTimeout(timerId)
+      }
+    }
+  }, [isOpen, selectedStudentId, students])
+  
+  // Memoized change handler to avoid re-creating on every render
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     
@@ -42,9 +64,14 @@ export default function AddStudentModal() {
         return newErrors
       })
     }
-  }
+    
+    // Clear any API error when user makes changes
+    if (apiError) {
+      setApiError(null)
+    }
+  }, [errors, apiError])
   
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {}
     
     if (!formData.name.trim()) {
@@ -65,38 +92,39 @@ export default function AddStudentModal() {
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }
+  }, [formData])
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) return
+    if (!validateForm() || !selectedStudentId) return
+    
+    const currentStudent = students.find(s => s.id === selectedStudentId)
+    if (!currentStudent) return
     
     setIsLoading(true)
     setApiError(null)
     
     try {
-      const newStudent: Student = {
-        id: crypto.randomUUID(),
+      // Prepare updated student data
+      const updatedStudent = {
+        ...currentStudent,
         name: formData.name.trim(),
         instrument: formData.instrument,
-        grade: formData.grade || '',
+        grade: formData.grade,
         day: formData.day,
-        time: formData.time,
-        notes: [],
-        contact: formData.contact || '',
-        currentMaterial: formData.currentMaterial || '',
-        attendance: 'Present',
-        lastActive: 'Today',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        time: formData.time.trim(),
+        contact: formData.contact.trim(),
+        currentMaterial: formData.currentMaterial.trim()
       }
       
-      await addStudent(newStudent)
+      // Update student in store and database
+      const result = await updateStudent(updatedStudent)
+      console.log('Student updated successfully:', result)
       handleClose()
     } catch (error) {
-      console.error('Error adding student:', error)
-      setApiError('Failed to add student. Please try again.')
+      console.error('Error updating student:', error)
+      setApiError('Failed to update student. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -104,23 +132,15 @@ export default function AddStudentModal() {
   
   const handleClose = () => {
     closeModal()
-    setFormData({
-      name: '',
-      instrument: '',
-      grade: '',
-      day: 'Monday',
-      time: '',
-      contact: '',
-      currentMaterial: ''
-    })
     setErrors({})
     setApiError(null)
+    setIsLoading(false)
   }
   
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
   
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Add New Student">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Edit Student">
       <form onSubmit={handleSubmit} className="space-y-4">
         {apiError && (
           <div className="px-4 py-3 rounded-md bg-red-50 text-red-800 text-sm">
@@ -141,6 +161,7 @@ export default function AddStudentModal() {
             className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
               errors.name ? 'border-error' : ''
             }`}
+            disabled={isLoading}
           />
           {errors.name && <p className="mt-1 text-sm text-error">{errors.name}</p>}
         </div>
@@ -159,7 +180,7 @@ export default function AddStudentModal() {
             }`}
           >
             <option value="">Select an instrument</option>
-            {instruments?.map((instrument: string) => (
+            {instruments.map(instrument => (
               <option key={instrument} value={instrument}>
                 {instrument}
               </option>
@@ -311,9 +332,9 @@ export default function AddStudentModal() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Adding...
+                Saving...
               </>
-            ) : 'Add Student'}
+            ) : 'Save Changes'}
           </button>
         </div>
       </form>
