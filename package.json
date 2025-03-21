@@ -1,21 +1,28 @@
 {
   "name": "student-progress-tracker",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "release": "standard-version"
+    "release": "standard-version",
+    "release:major": "standard-version --release-as major",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.19",
     "@heroicons/react": "^2.1.1",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.483.0",
     "mongodb": "^6.3.0",
     "next": "^15.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "tailwind-merge": "^3.0.2",
     "zod": "^3.22.4",
     "zustand": "^4.5.2"
   },
