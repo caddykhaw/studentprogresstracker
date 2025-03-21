@@ -26,6 +26,7 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
   const [newNote, setNewNote] = useState('')
   const [editingNoteIndex, setEditingNoteIndex] = useState<number | null>(null)
   const [editNoteContent, setEditNoteContent] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   
   // Add ESC key handler to cancel editing
   useEffect(() => {
@@ -57,6 +58,26 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
   const addNote = useStudentStore(state => state.addNote)
   const updateNote = useStudentStore(state => state.updateNote)
   const deleteNote = useStudentStore(state => state.deleteNote)
+  const fetchNotes = useStudentStore(state => state.fetchNotes)
+  
+  // Manually fetch notes when component mounts
+  useEffect(() => {
+    const loadNotes = async () => {
+      if (!studentId) return;
+      
+      setIsLoading(true);
+      try {
+        await fetchNotes(studentId);
+        console.log('Notes fetched for student:', studentId);
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadNotes();
+  }, [studentId, fetchNotes]);
   
   // Check for invalid date formats and normalize them
   useEffect(() => {
@@ -271,8 +292,31 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
         </div>
       </form>
       
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="p-4 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <svg className="animate-spin h-5 w-5 mr-3 inline" viewBox="0 0 24 24">
+            <circle 
+              className="opacity-25" 
+              cx="12" 
+              cy="12" 
+              r="10" 
+              stroke="currentColor" 
+              strokeWidth="4"
+              fill="none"
+            ></circle>
+            <path 
+              className="opacity-75" 
+              fill="currentColor" 
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          Loading notes...
+        </div>
+      )}
+      
       {/* Notes table */}
-      {student?.notes && student.notes.length > 0 ? (
+      {!isLoading && student?.notes && student.notes.length > 0 ? (
         <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-md">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -370,9 +414,11 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
           </table>
         </div>
       ) : (
-        <div className="p-4 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          No notes found for this student. Add your first note above.
-        </div>
+        !isLoading && (
+          <div className="p-4 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            No notes found for this student. Add your first note above.
+          </div>
+        )
       )}
     </div>
   )

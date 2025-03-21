@@ -11,15 +11,16 @@ interface StudentState {
   
   // Actions
   fetchStudents: () => Promise<void>
+  fetchNotes: (studentId: string) => Promise<void>
   setStudents: (students: Student[]) => void
   setCurrentStudentId: (id: string | null) => void
   setCurrentNoteIndex: (index: number | null) => void
   addStudent: (student: Student) => Promise<any>
   updateStudent: (updatedStudent: Student) => Promise<any>
   deleteStudent: (studentId: string) => Promise<any>
-  addNote: (params: { studentId: string, note: Note }) => void
-  updateNote: (params: { studentId: string, noteIndex: number, text: string }) => void
-  deleteNote: (params: { studentId: string, noteIndex: number }) => void
+  addNote: (params: { studentId: string, note: Note }) => Promise<any>
+  updateNote: (params: { studentId: string, noteIndex: number, text: string }) => Promise<any>
+  deleteNote: (params: { studentId: string, noteIndex: number }) => Promise<any>
   generateStudentId: () => string
   createStudent: (params: { name: string, instrument: string, grade: string, day: string, time: string, contact?: string, currentMaterial?: string }) => Student
   exportData: () => void
@@ -72,6 +73,78 @@ export const useStudentStore = create<StudentState>()(
             error: errorMessage,
             isLoading: false
           })
+        }
+      },
+      
+      fetchNotes: async (studentId) => {
+        console.log('🔄 Fetching notes for student:', studentId)
+        
+        try {
+          const response = await fetch(`/api/students/${studentId}/notes`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            cache: 'no-store'
+          })
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null)
+            throw new Error(
+              errorData?.details || 
+              `Failed to fetch notes: ${response.status} ${response.statusText}`
+            )
+          }
+          
+          const { notes } = await response.json()
+          
+          if (!Array.isArray(notes)) {
+            throw new Error('Invalid response format: expected an array of notes')
+          }
+          
+          // Update student with fetched notes, preserving existing ones
+          set((state) => {
+            const studentIndex = state.students.findIndex(s => s.id === studentId)
+            if (studentIndex === -1) return state
+            
+            // Get existing student
+            const student = state.students[studentIndex]
+            
+            // If there are no existing notes, use the fetched notes
+            if (!student.notes || student.notes.length === 0) {
+              const updatedStudents = [...state.students]
+              updatedStudents[studentIndex] = {
+                ...updatedStudents[studentIndex],
+                notes: notes
+              }
+              
+              console.log('✅ Successfully fetched notes:', notes.length)
+              return { students: updatedStudents }
+            }
+            
+            // Merge notes: add new ones that don't exist yet based on ID
+            const existingNoteIds = student.notes.map(note => note.id)
+            const newNotes = notes.filter(note => !existingNoteIds.includes(note.id))
+            
+            if (newNotes.length > 0) {
+              const updatedStudents = [...state.students]
+              updatedStudents[studentIndex] = {
+                ...updatedStudents[studentIndex],
+                notes: [...updatedStudents[studentIndex].notes, ...newNotes]
+              }
+              
+              console.log(`✅ Successfully added ${newNotes.length} new notes`)
+              return { students: updatedStudents }
+            }
+            
+            console.log('✅ No new notes to add')
+            return state
+          })
+        } catch (error) {
+          const errorMessage = error instanceof Error 
+            ? error.message 
+            : 'Network error while fetching notes'
+          console.error('❌ Error fetching notes:', errorMessage)
         }
       },
       
@@ -179,55 +252,167 @@ export const useStudentStore = create<StudentState>()(
         })
       },
       
-      addNote: ({ studentId, note }) => set((state) => {
-        const index = state.students.findIndex(s => s.id === studentId);
-        if (index === -1) return state;
+      addNote: ({ studentId, note }) => {
+        console.log('📝 Adding note to student:', studentId);
         
-        const newStudents = [...state.students];
-        newStudents[index] = {
-          ...newStudents[index],
-          notes: [...(newStudents[index].notes || []), note]
-        };
+        // Update local state immediately for responsiveness
+        set((state) => {
+          const index = state.students.findIndex(s => s.id === studentId);
+          if (index === -1) return state;
+          
+          const newStudents = [...state.students];
+          newStudents[index] = {
+            ...newStudents[index],
+            notes: [...(newStudents[index].notes || []), note]
+          };
+          
+          return { students: newStudents };
+        });
         
-        return { students: newStudents };
-      }),
+        // Persist to database
+        return fetch(`/api/students/${studentId}/notes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: note.content,
+            date: note.date
+          }),
+        })
+        .then(response => {
+          if (!response.ok) {
+            console.error(`❌ Failed to add note to database: ${response.status} ${response.statusText}`)
+            throw new Error(`Failed to add note: ${response.statusText}`)
+          } else {
+            console.log('✅ Note added to database')
+            return response.json()
+          }
+        })
+        .catch(err => {
+          console.error('❌ Error adding note to database:', err)
+          // Don't throw the error to prevent UI disruption
+          // The note is still in local state
+        });
+      },
       
-      updateNote: ({ studentId, noteIndex, text }) => set((state) => {
+      updateNote: ({ studentId, noteIndex, text }) => {
+        console.log('✏️ Updating note for student:', studentId);
+        
+        // Save original note data first
+        const state = get();
         const studentIndex = state.students.findIndex(s => s.id === studentId);
-        if (studentIndex === -1) return state;
+        if (studentIndex === -1) return Promise.resolve(); // Return a resolved promise
         
         const student = state.students[studentIndex];
-        if (!student.notes || !student.notes[noteIndex]) return state;
+        if (!student.notes || !student.notes[noteIndex]) return Promise.resolve(); // Return a resolved promise
         
-        const newNotes = [...student.notes];
-        newNotes[noteIndex] = { ...newNotes[noteIndex], content: text };
+        const originalNote = student.notes[noteIndex];
+        const noteId = originalNote.id;
         
-        const newStudents = [...state.students];
-        newStudents[studentIndex] = {
-          ...student,
-          notes: newNotes
-        };
+        // Update local state immediately for responsiveness
+        set((state) => {
+          const studentIndex = state.students.findIndex(s => s.id === studentId);
+          if (studentIndex === -1) return state;
+          
+          const student = state.students[studentIndex];
+          if (!student.notes || !student.notes[noteIndex]) return state;
+          
+          const newNotes = [...student.notes];
+          newNotes[noteIndex] = { ...newNotes[noteIndex], content: text };
+          
+          const newStudents = [...state.students];
+          newStudents[studentIndex] = {
+            ...student,
+            notes: newNotes
+          };
+          
+          return { students: newStudents };
+        });
         
-        return { students: newStudents };
-      }),
+        // Persist to database
+        return fetch(`/api/students/${studentId}/notes/${noteId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: text,
+            date: originalNote.date
+          }),
+        })
+        .then(response => {
+          if (!response.ok) {
+            console.error(`❌ Failed to update note in database: ${response.status} ${response.statusText}`)
+            throw new Error(`Failed to update note: ${response.statusText}`)
+          } else {
+            console.log('✅ Note updated in database')
+            return response.json()
+          }
+        })
+        .catch(err => {
+          console.error('❌ Error updating note in database:', err)
+          // Don't throw the error to prevent UI disruption
+          // The note is still updated in local state
+          return Promise.resolve(); // Return a resolved promise
+        });
+      },
       
-      deleteNote: ({ studentId, noteIndex }) => set((state) => {
+      deleteNote: ({ studentId, noteIndex }) => {
+        console.log('🗑️ Deleting note for student:', studentId);
+        
+        // Save original note data first
+        const state = get();
         const studentIndex = state.students.findIndex(s => s.id === studentId);
-        if (studentIndex === -1) return state;
+        if (studentIndex === -1) return Promise.resolve(); // Return a resolved promise
         
         const student = state.students[studentIndex];
-        if (!student.notes || !student.notes[noteIndex]) return state;
+        if (!student.notes || !student.notes[noteIndex]) return Promise.resolve(); // Return a resolved promise
         
-        const newNotes = student.notes.filter((_, i) => i !== noteIndex);
+        const noteId = student.notes[noteIndex].id;
         
-        const newStudents = [...state.students];
-        newStudents[studentIndex] = {
-          ...student,
-          notes: newNotes
-        };
+        // Update local state immediately for responsiveness
+        set((state) => {
+          const studentIndex = state.students.findIndex(s => s.id === studentId);
+          if (studentIndex === -1) return state;
+          
+          const student = state.students[studentIndex];
+          if (!student.notes || !student.notes[noteIndex]) return state;
+          
+          const newNotes = student.notes.filter((_, i) => i !== noteIndex);
+          
+          const newStudents = [...state.students];
+          newStudents[studentIndex] = {
+            ...student,
+            notes: newNotes
+          };
+          
+          return { students: newStudents };
+        });
         
-        return { students: newStudents };
-      }),
+        // Persist to database
+        return fetch(`/api/students/${studentId}/notes/${noteId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            console.error(`❌ Failed to delete note from database: ${response.status} ${response.statusText}`)
+            throw new Error(`Failed to delete note: ${response.statusText}`)
+          } else {
+            console.log('✅ Note deleted from database')
+            return response.json()
+          }
+        })
+        .catch(err => {
+          console.error('❌ Error deleting note from database:', err)
+          // Don't throw the error to prevent UI disruption
+          // The note is still deleted in local state
+          return Promise.resolve(); // Return a resolved promise
+        });
+      },
       
       generateStudentId: () => {
         const state = get();

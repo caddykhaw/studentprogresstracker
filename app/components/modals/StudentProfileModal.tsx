@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStudentStore } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
 import Modal from './Modal'
@@ -21,10 +21,25 @@ export default function StudentProfileModal() {
   
   const selectedStudentId = useUIStore(state => state.selectedStudentId)
   const students = useStudentStore(state => state.students)
+  const fetchNotes = useStudentStore(state => state.fetchNotes)
   
   const [activeTab, setActiveTab] = useState('details')
   
   const currentStudent = students.find(s => s.id === selectedStudentId)
+  
+  // Fetch student notes when profile is opened or when switching to notes tab
+  useEffect(() => {
+    if (isOpen && selectedStudentId) {
+      fetchNotes(selectedStudentId)
+    }
+  }, [isOpen, selectedStudentId, fetchNotes])
+  
+  // Fetch notes again when switching to notes tab
+  useEffect(() => {
+    if (isOpen && selectedStudentId && activeTab === 'notes') {
+      fetchNotes(selectedStudentId)
+    }
+  }, [activeTab, isOpen, selectedStudentId, fetchNotes])
   
   if (!currentStudent) return null
   

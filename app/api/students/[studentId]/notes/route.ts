@@ -39,14 +39,14 @@ export async function POST(
     const { db } = await connectToDatabase();
     
     const note = {
-      id: new ObjectId().toString(),
+      id: crypto.randomUUID(),
       content: validationResult.data.content,
       date: validationResult.data.date || new Date().toISOString()
     };
     
     const result = await db.collection('students').updateOne(
-      { _id: new ObjectId(params.studentId) },
-      { $push: { notes: note } }
+      { id: params.studentId },
+      { $push: { notes: note } as any }
     );
     
     if (!result.acknowledged) {
@@ -93,7 +93,7 @@ export async function PUT(
     
     const result = await db.collection('students').updateOne(
       { 
-        _id: new ObjectId(params.studentId),
+        id: params.studentId,
         'notes.id': params.noteId
       },
       { 
@@ -142,8 +142,8 @@ export async function DELETE(
     const { db } = await connectToDatabase();
     
     const result = await db.collection('students').updateOne(
-      { _id: new ObjectId(params.studentId) },
-      { $pull: { notes: { id: params.noteId } } }
+      { id: params.studentId },
+      { $pull: { notes: { id: params.noteId } } as any }
     );
     
     if (!result.acknowledged) {
@@ -177,22 +177,36 @@ export async function GET(
   request: Request,
   { params }: { params: { studentId: string } }
 ) {
+  console.log('📊 GET /api/students/[studentId]/notes - Starting request...');
+
   try {
-    // Here you would typically fetch the student's notes from your database
-    // For now, we'll return mock data
-    return NextResponse.json({
-      notes: [
-        {
-          id: '1',
-          content: 'Completed homework assignment',
-          date: new Date().toISOString()
-        }
-      ]
-    })
+    const { db } = await connectToDatabase();
+    
+    const student = await db.collection('students').findOne(
+      { id: params.studentId },
+      { projection: { notes: 1 } }
+    );
+    
+    if (!student) {
+      return NextResponse.json(
+        { error: 'Student not found' },
+        { status: 404, headers: NO_CACHE_HEADERS }
+      );
+    }
+    
+    // Return empty array if no notes found
+    const notes = student.notes || [];
+    
+    console.log(`✅ Retrieved ${notes.length} notes for student ${params.studentId}`);
+    
+    return NextResponse.json({ notes }, {
+      headers: NO_CACHE_HEADERS
+    });
   } catch (error) {
+    console.error('❌ Error in GET /api/students/[studentId]/notes:', error);
     return NextResponse.json(
-      { error: "Failed to fetch notes" },
-      { status: 500 }
-    )
+      { error: 'Failed to fetch notes', details: error instanceof Error ? error.message : 'An unknown error occurred' },
+      { status: 500, headers: NO_CACHE_HEADERS }
+    );
   }
 } 

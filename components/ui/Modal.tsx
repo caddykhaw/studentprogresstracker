@@ -13,7 +13,7 @@ interface ModalProps {
   onClose: () => void
   children: ReactNode
   title: ReactNode
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
   priority?: number // Optional priority (higher = shown on top)
 }
 
@@ -29,7 +29,9 @@ export default function Modal({
     sm: 'max-w-sm',
     md: 'max-w-md',
     lg: 'max-w-lg',
-    xl: 'max-w-3xl'
+    xl: 'max-w-3xl',
+    '2xl': 'max-w-4xl',
+    'full': 'w-[95%]'
   }
   
   const modalId = useId();
@@ -64,7 +66,29 @@ export default function Modal({
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        // Get top modal from stack
+        // First check if there's an embedded YouTube video playing
+        const youtubeIframes = document.querySelectorAll('iframe[src*="youtube.com/embed"]');
+        
+        if (youtubeIframes.length > 0) {
+          // Get the topmost YouTube iframe based on z-index/DOM position
+          // We're assuming the highest in the DOM is likely the one we want to close
+          const video = youtubeIframes[youtubeIframes.length - 1];
+          // Check if the video is visible
+          const videoContainer = video.closest('.fixed');
+          
+          if (videoContainer) {
+            // Find and click its close button
+            const closeButton = videoContainer.querySelector('button');
+            if (closeButton) {
+              e.preventDefault();
+              e.stopPropagation();
+              closeButton.click();
+              return; // Stop here, don't close the modal
+            }
+          }
+        }
+        
+        // If no video to close, then check if this is the top modal
         const topModalId = window.modalStack[window.modalStack.length - 1];
         
         // Only close if this is the top modal
@@ -128,12 +152,12 @@ export default function Modal({
         className="fixed inset-0 flex items-center justify-center p-4"
         style={{ zIndex }}
       >
-        <Dialog.Panel className={`w-full ${sizeClasses[size]} rounded-lg bg-white dark:bg-gray-800`}>
+        <Dialog.Panel className={`w-full ${sizeClasses[size]} rounded-lg bg-white dark:bg-gray-800 max-h-[90vh] flex flex-col`}>
           <Dialog.Title className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="text-lg font-semibold text-gray-900 dark:text-white">{title}</div>
           </Dialog.Title>
           
-          <div className="p-6">
+          <div className="p-6 overflow-y-auto">
             {children}
           </div>
         </Dialog.Panel>

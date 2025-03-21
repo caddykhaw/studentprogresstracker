@@ -42,7 +42,7 @@ export default function StudentProfileModal() {
       isOpen={isOpen} 
       onClose={handleClose} 
       title={currentStudent.name}
-      size={activeTab === 'notes' ? 'xl' : 'lg'}
+      size={activeTab === 'notes' ? '2xl' : 'lg'}
     >
       <div className="mb-4">
         <div className="flex border-b">

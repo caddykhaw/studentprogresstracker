@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useStudentStore } from '@/store/useStudentStore'
-import { useUIStore } from '@/store/useUIStore'
+import { useStudentStore } from '@/app/store/useStudentStore'
+import { useUIStore } from '@/app/store/useUIStore'
 import Modal from '../ui/Modal'
+import QuickAddSong from '../songs/QuickAddSong'
+import { Song } from '@/lib/types'
 
 export default function AddNoteModal() {
   const isOpen = useUIStore(state => state.isAddNoteModalOpen)
@@ -13,6 +15,7 @@ export default function AddNoteModal() {
   
   const [content, setContent] = useState('')
   const [error, setError] = useState('')
+  const [addedSongs, setAddedSongs] = useState<Song[]>([])
   
   const currentStudent = students.find(s => s.id === currentStudentId)
   
@@ -26,12 +29,23 @@ export default function AddNoteModal() {
     
     if (!currentStudentId) return
     
+    // Include any added songs in the note content
+    let noteContent = content.trim()
+    
+    if (addedSongs.length > 0) {
+      const songsList = addedSongs.map(song => 
+        `- ${song.title}${song.artist ? ` by ${song.artist}` : ''}`
+      ).join('\n')
+      
+      noteContent += `\n\nSongs added:\n${songsList}`
+    }
+    
     addNote({ 
       studentId: currentStudentId, 
       note: {
         id: crypto.randomUUID(),
         date: new Date().toISOString(),
-        content: content.trim()
+        content: noteContent
       }
     })
     
@@ -47,6 +61,11 @@ export default function AddNoteModal() {
     setIsOpen()
     setContent('')
     setError('')
+    setAddedSongs([])
+  }
+  
+  const handleSongAdded = (song: Song) => {
+    setAddedSongs(prev => [...prev, song])
   }
   
   if (!currentStudent) return null
@@ -71,6 +90,29 @@ export default function AddNoteModal() {
           />
           {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
         </div>
+        
+        {/* Display added songs */}
+        {addedSongs.length > 0 && (
+          <div className="mt-2">
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Added Songs:
+            </h4>
+            <ul className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              {addedSongs.map(song => (
+                <li key={song.id} className="flex items-center">
+                  <span>• {song.title}</span>
+                  {song.artist && <span className="ml-1 text-gray-500">by {song.artist}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {/* Quick Add Song Component */}
+        <QuickAddSong 
+          studentId={currentStudentId!} 
+          onSongAdded={handleSongAdded} 
+        />
         
         <div className="flex justify-end space-x-3 pt-4">
           <button

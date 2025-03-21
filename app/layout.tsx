@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Providers } from '../lib/AppComponents'
 import '../styles/globals.css'
+import AppSongsLoader from './components/AppSongsLoader'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -18,18 +19,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: {
-    template: '%s | Student Progress Tracker',
-    default: 'Student Progress Tracker',
-  },
-  description: 'Track student progress, lessons, and notes',
-  metadataBase: new URL('http://localhost:3000'),
-  openGraph: {
-    title: 'Student Progress Tracker',
-    description: 'Track student progress, lessons, and notes',
-    locale: 'en_US',
-    type: 'website',
-  },
+  title: 'Student Progress Tracker',
+  description: 'Track and manage student progress',
 }
 
 export default function RootLayout({
@@ -42,6 +33,7 @@ export default function RootLayout({
       <body className={`${inter.className} transition-colors duration-300`}>
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col">
           <Providers>
+            <AppSongsLoader />
             {children}
           </Providers>
         </div>
