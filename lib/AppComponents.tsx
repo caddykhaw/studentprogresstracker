@@ -7,6 +7,7 @@ export { default as ThemeToggle } from '../components/ui/ThemeToggle';
 
 // Layout Components
 export { default as Header } from '../components/layout/Header';
+export { default as Footer } from '../components/layout/Footer';
 export { default as Providers } from '../components/layout/Providers';
 
 // Student Components
@@ -23,5 +24,11 @@ export { default as StudentProfileModal } from '../components/modals/StudentProf
 export { default as AddNoteModal } from '../components/modals/AddNoteModal';
 export { default as EditNoteModal } from '../components/modals/EditNoteModal';
 export { default as SettingsModal } from '../components/modals/SettingsModal';
+
+// Song Components
+export { default as SongLibrary } from '../components/songs/SongLibrary';
+export { default as SongTable } from '../components/songs/SongTable';
+export { default as SongForm } from '../components/songs/SongForm';
+export { default as SongDetailModal } from '../components/songs/SongDetailModal';
 
 // Add other component exports as needed 

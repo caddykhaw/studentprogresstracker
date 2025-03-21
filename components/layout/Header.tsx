@@ -3,28 +3,47 @@
 import { useState } from 'react'
 import { useUIStore } from '@/store/useUIStore'
 import ThemeToggle from '../ui/ThemeToggle'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export default function Header() {
-  const openAddStudentModal = useUIStore(state => state.openAddStudentModal)
   const openSettingsModal = useUIStore(state => state.openSettingsModal)
+  const pathname = usePathname()
   
   return (
     <header className="bg-blue-800 dark:bg-blue-900 text-white shadow-md transition-colors duration-200">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">Student Progress Tracker</h1>
+        <div className="flex items-center space-x-6">
+          <Link href="/" className="text-2xl font-bold text-white">
+            Student Progress Tracker
+          </Link>
+          
+          <nav className="hidden md:flex space-x-4">
+            <Link 
+              href="/" 
+              className={`text-sm font-medium ${
+                pathname === '/' 
+                  ? 'text-white' 
+                  : 'text-blue-200 hover:text-white'
+              } transition-colors duration-200`}
+            >
+              Dashboard
+            </Link>
+            <Link 
+              href="/songs" 
+              className={`text-sm font-medium ${
+                pathname === '/songs' 
+                  ? 'text-white' 
+                  : 'text-blue-200 hover:text-white'
+              } transition-colors duration-200`}
+            >
+              Song Library
+            </Link>
+          </nav>
+        </div>
         
         <div className="flex items-center space-x-4">
           <ThemeToggle />
-          
-          <button
-            onClick={openAddStudentModal}
-            className="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-900 dark:bg-blue-800 dark:hover:bg-blue-950 rounded-md shadow-sm text-sm font-medium text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
-            Add Student
-          </button>
           
           <button
             onClick={openSettingsModal}

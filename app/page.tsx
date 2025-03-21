@@ -11,7 +11,8 @@ import {
   EditStudentModal,
   StudentProfileModal,
   SettingsModal,
-  StatsSection
+  StatsSection,
+  Footer
 } from '@/lib/AppComponents'
 
 function LoadingSpinner() {
@@ -78,7 +79,7 @@ export default function Home() {
     <>
       <Header />
       
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 min-h-[calc(100vh-13rem)]">
         <div className="mb-6 text-center">
           <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
             {today} - {timeString}
@@ -105,6 +106,8 @@ export default function Home() {
           </div>
         </div>
       </main>
+      
+      <Footer />
       
       <AddStudentModal />
       <EditStudentModal />

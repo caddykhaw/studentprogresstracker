@@ -1,9 +1,61 @@
 import { ObjectId } from 'mongodb';
 
+// Add declaration for window.modalStack
+declare global {
+  interface Window {
+    modalStack: string[];
+  }
+}
+
 export interface Note {
   id: string;
   content: string;
   date: string;
+}
+
+// Song Library Types
+export interface Song {
+  _id?: ObjectId;
+  id: string;
+  title: string;
+  artist?: string;
+  keyLetter?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  keyModifier?: '♯' | '♭';
+  keyMode?: 'major' | 'minor';
+  bpm?: number;
+  youtubeUrl?: string;
+  lastTaught?: string;
+  frequency: number;
+  createdAt: string;
+}
+
+export interface SongTeaching {
+  id: string;
+  songId: string;
+  studentId: string;
+  taughtDate: string;
+  lessonId?: string;
+}
+
+export interface SongCreate {
+  title: string;
+  artist?: string;
+  keyLetter?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  keyModifier?: '♯' | '♭';
+  keyMode?: 'major' | 'minor';
+  bpm?: number;
+  youtubeUrl?: string;
+}
+
+export interface SongUpdate extends Partial<SongCreate> {
+  id: string;
+}
+
+export interface SongTeachingCreate {
+  songId: string;
+  studentId: string;
+  taughtDate: string;
+  lessonId?: string;
 }
 
 export interface Student {

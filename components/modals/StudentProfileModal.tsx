@@ -41,17 +41,7 @@ export default function StudentProfileModal() {
     <Modal 
       isOpen={isOpen} 
       onClose={handleClose} 
-      title={
-        <div className="flex justify-between items-center w-full">
-          <span>{currentStudent.name}</span>
-          <button
-            onClick={handleEdit}
-            className="px-3 py-1 text-sm rounded-md bg-primary hover:bg-primary-dark text-white transition-colors"
-          >
-            Edit Student
-          </button>
-        </div>
-      }
+      title={currentStudent.name}
       size={activeTab === 'notes' ? 'xl' : 'lg'}
     >
       <div className="mb-4">
@@ -116,6 +106,24 @@ export default function StudentProfileModal() {
           <StudentNotes studentId={selectedStudentId!} />
         </div>
       )}
+      
+      {/* Actions buttons at the bottom similar to SongForm */}
+      <div className="mt-6 flex justify-end space-x-3">
+        <button
+          type="button"
+          onClick={handleClose}
+          className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          onClick={handleEdit}
+          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Edit Student
+        </button>
+      </div>
     </Modal>
   )
 } 
