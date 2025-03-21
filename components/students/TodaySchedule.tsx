@@ -6,8 +6,7 @@ import { useUIStore } from '@/store/useUIStore'
 
 export default function TodaySchedule() {
   const students = useStudentStore(state => state.students)
-  const setCurrentStudentId = useStudentStore(state => state.setCurrentStudentId)
-  const setStudentProfileModalOpen = useUIStore(state => state.setStudentProfileModalOpen)
+  const openStudentProfileModal = useUIStore(state => state.openStudentProfileModal)
 
   // Get today's day name
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' })
@@ -47,9 +46,8 @@ export default function TodaySchedule() {
     return () => clearInterval(interval)
   }, [])
 
-  const openStudentProfile = (studentId: string) => {
-    setCurrentStudentId(studentId)
-    setStudentProfileModalOpen(true)
+  const handleOpenStudentProfile = (studentId: string) => {
+    openStudentProfileModal(studentId)
   }
 
   if (todaysRemainingStudents.length === 0) {
@@ -92,7 +90,7 @@ export default function TodaySchedule() {
           return (
             <li
               key={student.id}
-              onClick={() => openStudentProfile(student.id)}
+              onClick={() => handleOpenStudentProfile(student.id)}
               className="py-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 px-2 rounded cursor-pointer transition-colors"
             >
               <div>

@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useStudentStore } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
-import Modal from './Modal'
-import StudentNotes from '../StudentNotes'
+import Modal from '../ui/Modal'
+import StudentNotes from '../students/StudentNotes'
 
 // Use the Note interface from the store
 interface Note {
@@ -14,30 +14,27 @@ interface Note {
 }
 
 export default function StudentProfileModal() {
-  const isOpen = useUIStore(state => state.studentProfileModalOpen)
-  const setIsOpen = useUIStore(state => state.setStudentProfileModalOpen)
-  const setAddNoteModalOpen = useUIStore(state => state.setAddNoteModalOpen)
-  const setEditNoteModalOpen = useUIStore(state => state.setEditNoteModalOpen)
-  const setEditStudentModalOpen = useUIStore(state => state.setEditStudentModalOpen)
+  const isOpen = useUIStore(state => state.isStudentProfileModalOpen)
+  const closeStudentProfileModal = useUIStore(state => state.closeStudentProfileModal)
+  const openEditStudentModal = useUIStore(state => state.openEditStudentModal)
+  const openEditStudentFromProfile = useUIStore(state => state.openEditStudentFromProfile)
   
-  const currentStudentId = useStudentStore(state => state.currentStudentId)
+  const selectedStudentId = useUIStore(state => state.selectedStudentId)
   const students = useStudentStore(state => state.students)
-  const setCurrentNoteIndex = useStudentStore(state => state.setCurrentNoteIndex)
   
   const [activeTab, setActiveTab] = useState('details')
   
-  const currentStudent = students.find(s => s.id === currentStudentId)
+  const currentStudent = students.find(s => s.id === selectedStudentId)
   
   if (!currentStudent) return null
   
   const handleClose = () => {
-    setIsOpen(false)
+    closeStudentProfileModal()
     setActiveTab('details')
   }
 
   const handleEdit = () => {
-    setEditStudentModalOpen(true)
-    setIsOpen(false)
+    openEditStudentFromProfile(currentStudent.id)
   }
   
   return (
@@ -55,7 +52,7 @@ export default function StudentProfileModal() {
           </button>
         </div>
       }
-      size="lg"
+      size={activeTab === 'notes' ? 'xl' : 'lg'}
     >
       <div className="mb-4">
         <div className="flex border-b">
@@ -69,33 +66,37 @@ export default function StudentProfileModal() {
             className={`px-4 py-2 ${activeTab === 'notes' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
             onClick={() => setActiveTab('notes')}
           >
-            Notes ({currentStudent.notes.length})
+            Notes
           </button>
         </div>
       </div>
       
       {activeTab === 'details' && (
         <div className="space-y-4">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Instrument</h3>
-            <p className="mt-1 dark:text-white">{currentStudent.instrument}</p>
-          </div>
-          
-          {currentStudent.grade && (
+          {/* Instrument and Grade side by side */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Instrument</h3>
+              <p className="mt-1 dark:text-white">{currentStudent.instrument}</p>
+            </div>
+            
             <div>
               <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Grade/Level</h3>
-              <p className="mt-1 dark:text-white">{currentStudent.grade}</p>
+              <p className="mt-1 dark:text-white">{currentStudent.grade || 'Not provided'}</p>
             </div>
-          )}
-          
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Lesson Day</h3>
-            <p className="mt-1 dark:text-white">{currentStudent.day}</p>
           </div>
           
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Lesson Time</h3>
-            <p className="mt-1 dark:text-white">{currentStudent.time}</p>
+          {/* Day and Time side by side */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Lesson Day</h3>
+              <p className="mt-1 dark:text-white">{currentStudent.day}</p>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Lesson Time</h3>
+              <p className="mt-1 dark:text-white">{currentStudent.time}</p>
+            </div>
           </div>
           
           <div>
@@ -112,7 +113,7 @@ export default function StudentProfileModal() {
       
       {activeTab === 'notes' && (
         <div>
-          <StudentNotes studentId={currentStudentId!} />
+          <StudentNotes studentId={selectedStudentId!} />
         </div>
       )}
     </Modal>

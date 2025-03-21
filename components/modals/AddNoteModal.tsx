@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import { useStudentStore } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
-import Modal from './Modal'
+import Modal from '../ui/Modal'
 
 export default function AddNoteModal() {
-  const isOpen = useUIStore(state => state.addNoteModalOpen)
-  const setIsOpen = useUIStore(state => state.setAddNoteModalOpen)
+  const isOpen = useUIStore(state => state.isAddNoteModalOpen)
+  const setIsOpen = useUIStore(state => state.closeAddNoteModal)
   
   const { addNote, currentStudentId, students } = useStudentStore()
   
@@ -44,7 +44,7 @@ export default function AddNoteModal() {
   }
   
   const handleClose = () => {
-    setIsOpen(false)
+    setIsOpen()
     setContent('')
     setError('')
   }
@@ -52,10 +52,10 @@ export default function AddNoteModal() {
   if (!currentStudent) return null
   
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={`Add Note for ${currentStudent.name}`}>
+    <Modal isOpen={isOpen} onClose={handleClose} title={`Add Note for ${currentStudent.name}`} size="xl">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Note Content <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -63,8 +63,8 @@ export default function AddNoteModal() {
             name="content"
             value={content}
             onChange={handleChange}
-            rows={6}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+            rows={8}
+            className={`mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
               error ? 'border-red-500' : ''
             }`}
             placeholder="Enter lesson notes, progress updates, or reminders..."

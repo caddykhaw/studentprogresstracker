@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useStudentStore } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
-import Modal from './Modal'
+import Modal from '../ui/Modal'
 
 export default function EditNoteModal() {
-  const isOpen = useUIStore(state => state.editNoteModalOpen)
-  const setIsOpen = useUIStore(state => state.setEditNoteModalOpen)
+  const isOpen = useUIStore(state => state.isEditNoteModalOpen)
+  const setIsOpen = useUIStore(state => state.closeEditNoteModal)
   
   const { updateNote, currentStudentId, currentNoteIndex, students } = useStudentStore()
   
@@ -49,17 +49,17 @@ export default function EditNoteModal() {
   }
   
   const handleClose = () => {
-    setIsOpen(false)
+    setIsOpen()
     setError('')
   }
   
   if (!currentStudent || !currentNote) return null
   
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={`Edit Note for ${currentStudent.name}`}>
+    <Modal isOpen={isOpen} onClose={handleClose} title={`Edit Note for ${currentStudent.name}`} size="xl">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Note Content <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -67,8 +67,8 @@ export default function EditNoteModal() {
             name="content"
             value={content}
             onChange={handleChange}
-            rows={6}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+            rows={8}
+            className={`mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
               error ? 'border-red-500' : ''
             }`}
           />

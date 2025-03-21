@@ -5,17 +5,13 @@ import { useStudentStore } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
 
 export default function TodaysLessons() {
-  const { getTodaysLessons } = useStudentSelectors()
+  // Get today's lessons directly from selectors object
+  const todaysLessons = useStudentSelectors.getTodaysLessons()
   
-  // Get today's lessons - already sorted by time in the useStudentSelectors hook
-  const todaysLessons = getTodaysLessons()
+  const openStudentProfileModal = useUIStore(state => state.openStudentProfileModal)
   
-  const setCurrentStudentId = useStudentStore(state => state.setCurrentStudentId)
-  const setStudentProfileModalOpen = useUIStore(state => state.setStudentProfileModalOpen)
-  
-  const openStudentProfile = (studentId: string) => {
-    setCurrentStudentId(studentId)
-    setStudentProfileModalOpen(true)
+  const handleOpenStudentProfile = (studentId: string) => {
+    openStudentProfileModal(studentId)
   }
   
   return (
@@ -32,7 +28,7 @@ export default function TodaysLessons() {
             <li 
               key={student.id} 
               className="py-3 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 px-2 rounded cursor-pointer transition-colors"
-              onClick={() => openStudentProfile(student.id)}
+              onClick={() => handleOpenStudentProfile(student.id)}
             >
               <div>
                 <h3 className="text-lg font-medium text-black dark:text-white">{student.name}</h3>

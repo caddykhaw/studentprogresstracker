@@ -2,8 +2,9 @@
 
 import { useState, useRef } from 'react'
 import { useStudentStore } from '@/store/useStudentStore'
+import { useSettingsStore } from '@/store/useSettingsStore'
 import { useUIStore } from '@/store/useUIStore'
-import Modal from './Modal'
+import Modal from '../ui/Modal'
 
 // CSS variables for standardization
 const styles = {
@@ -33,10 +34,15 @@ const styles = {
 }
 
 export default function SettingsModal() {
-  const isOpen = useUIStore(state => state.settingsModalOpen)
-  const setIsOpen = useUIStore(state => state.setSettingsModalOpen)
+  const isOpen = useUIStore(state => state.isSettingsModalOpen)
+  const setIsOpen = useUIStore(state => state.closeSettingsModal)
   
-  const { settings, addInstrument, deleteInstrument, exportData, setStudents, setSettings } = useStudentStore()
+  // Get settings data from the settings store
+  const instruments = useSettingsStore(state => state.instruments)
+  const setInstruments = useSettingsStore(state => state.setInstruments)
+  
+  // Get student data methods from the student store
+  const { setStudents } = useStudentStore()
   
   const [newInstrument, setNewInstrument] = useState('')
   const [error, setError] = useState('')
@@ -52,14 +58,15 @@ export default function SettingsModal() {
     
     const trimmedInstrument = newInstrument.trim()
     
-    if (settings.instruments.includes(trimmedInstrument)) {
+    if (instruments.includes(trimmedInstrument)) {
       setError('This instrument already exists')
       return
     }
     
     setIsLoading(true)
     try {
-      await addInstrument(trimmedInstrument)
+      // Add the new instrument to the existing list
+      setInstruments([...instruments, trimmedInstrument])
       setNewInstrument('')
       setError('')
     } catch (error) {
@@ -77,7 +84,8 @@ export default function SettingsModal() {
     
     setIsLoading(true)
     try {
-      await deleteInstrument(instrument)
+      // Remove the instrument from the list
+      setInstruments(instruments.filter(i => i !== instrument))
     } catch (error) {
       alert('Failed to delete instrument. Please try again.')
       console.error('Error deleting instrument:', error)
@@ -87,7 +95,20 @@ export default function SettingsModal() {
   }
   
   const handleExportData = () => {
-    exportData()
+    const settings = { instruments }
+    const students = useStudentStore.getState().students
+    const data = { settings, students }
+    
+    // Create a downloadable file
+    const dataStr = JSON.stringify(data, null, 2)
+    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`
+    
+    const exportFileDefaultName = `student-progress-tracker-export-${new Date().toISOString().slice(0, 10)}.json`
+    
+    const linkElement = document.createElement('a')
+    linkElement.setAttribute('href', dataUri)
+    linkElement.setAttribute('download', exportFileDefaultName)
+    linkElement.click()
   }
   
   const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +121,9 @@ export default function SettingsModal() {
         const data = JSON.parse(event.target?.result as string)
         if (data.students && data.settings) {
           setStudents(data.students)
-          setSettings(data.settings)
+          if (data.settings.instruments) {
+            setInstruments(data.settings.instruments)
+          }
           alert('Data imported successfully!')
         } else {
           alert('Invalid data format')
@@ -117,7 +140,7 @@ export default function SettingsModal() {
   }
   
   const handleClose = () => {
-    setIsOpen(false)
+    setIsOpen()
     setNewInstrument('')
     setError('')
   }
@@ -156,11 +179,11 @@ export default function SettingsModal() {
           
           <div className="mt-4">
             <h4 className={styles.section.subtitle}>Current Instruments:</h4>
-            {settings.instruments.length === 0 ? (
+            {instruments.length === 0 ? (
               <p className={styles.text.muted}>No instruments added yet</p>
             ) : (
               <ul className="space-y-2">
-                {settings.instruments.map(instrument => (
+                {instruments.map(instrument => (
                   <li key={instrument} className={styles.listItem}>
                     <span>{instrument}</span>
                     <button

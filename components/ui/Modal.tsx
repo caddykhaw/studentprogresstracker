@@ -8,14 +8,15 @@ interface ModalProps {
   onClose: () => void
   children: ReactNode
   title: ReactNode
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
 export default function Modal({ isOpen, onClose, children, title, size = 'md' }: ModalProps) {
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
-    lg: 'max-w-lg'
+    lg: 'max-w-lg',
+    xl: 'max-w-3xl'
   }
 
   return (

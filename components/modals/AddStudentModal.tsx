@@ -1,15 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStudentStore } from '@/store/useStudentStore'
 import { useUIStore } from '@/store/useUIStore'
-import Modal from './Modal'
+import { useSettingsStore } from '@/store/useSettingsStore'
+import { Student, Note } from '@/lib/types'
+import Modal from '../ui/Modal'
 
 export default function AddStudentModal() {
-  const isOpen = useUIStore(state => state.addStudentModalOpen)
-  const setIsOpen = useUIStore(state => state.setAddStudentModalOpen)
+  const isOpen = useUIStore(state => state.isAddStudentModalOpen)
+  const closeModal = useUIStore(state => state.closeAddStudentModal)
   
-  const { addStudent, createStudent, settings } = useStudentStore()
+  const { addStudent } = useStudentStore()
+  const { instruments } = useSettingsStore()
   
   const [formData, setFormData] = useState({
     name: '',
@@ -22,6 +25,10 @@ export default function AddStudentModal() {
   })
   
   const [errors, setErrors] = useState<Record<string, string>>({})
+  
+  // Add loading state for better UX
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -60,26 +67,43 @@ export default function AddStudentModal() {
     return Object.keys(newErrors).length === 0
   }
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!validateForm()) return
     
-    createStudent({
-      name: formData.name.trim(),
-      instrument: formData.instrument,
-      grade: formData.grade.trim(),
-      day: formData.day,
-      time: formData.time.trim(),
-      contact: formData.contact.trim(),
-      currentMaterial: formData.currentMaterial.trim()
-    })
+    setIsLoading(true)
+    setApiError(null)
     
-    handleClose()
+    try {
+      const newStudent: Student = {
+        id: crypto.randomUUID(),
+        name: formData.name.trim(),
+        instrument: formData.instrument,
+        grade: formData.grade || '',
+        day: formData.day,
+        time: formData.time,
+        notes: [],
+        contact: formData.contact || '',
+        currentMaterial: formData.currentMaterial || '',
+        attendance: 'Present',
+        lastActive: 'Today',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      
+      await addStudent(newStudent)
+      handleClose()
+    } catch (error) {
+      console.error('Error adding student:', error)
+      setApiError('Failed to add student. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
   
   const handleClose = () => {
-    setIsOpen(false)
+    closeModal()
     setFormData({
       name: '',
       instrument: '',
@@ -90,6 +114,7 @@ export default function AddStudentModal() {
       currentMaterial: ''
     })
     setErrors({})
+    setApiError(null)
   }
   
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -97,6 +122,12 @@ export default function AddStudentModal() {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Add New Student">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {apiError && (
+          <div className="px-4 py-3 rounded-md bg-red-50 text-red-800 text-sm">
+            <p>{apiError}</p>
+          </div>
+        )}
+        
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-text-dark dark:text-text-light">
             Name <span className="text-error">*</span>
@@ -128,7 +159,7 @@ export default function AddStudentModal() {
             }`}
           >
             <option value="">Select an instrument</option>
-            {settings.instruments.map(instrument => (
+            {instruments?.map((instrument: string) => (
               <option key={instrument} value={instrument}>
                 {instrument}
               </option>
@@ -265,14 +296,24 @@ export default function AddStudentModal() {
             type="button"
             onClick={handleClose}
             className="rounded-md border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark px-4 py-2 text-sm font-medium text-text-dark dark:text-text-light shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bg-dark"
+            disabled={isLoading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-md border border-transparent bg-primary hover:bg-primary-dark px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bg-dark"
+            className="rounded-md border border-transparent bg-primary hover:bg-primary-dark px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bg-dark flex items-center"
+            disabled={isLoading}
           >
-            Add Student
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Adding...
+              </>
+            ) : 'Add Student'}
           </button>
         </div>
       </form>

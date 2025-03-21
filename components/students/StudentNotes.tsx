@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useStudentStore } from '@/store/useStudentStore'
-import { Note } from '@/store/useStudentStore'
+import { Note } from '@/lib/types'
 
 // Component to render note content with proper line breaks
 const NoteContent = ({ content }: { content: string }) => {
@@ -12,7 +12,7 @@ const NoteContent = ({ content }: { content: string }) => {
   }
   
   return (
-    <div className="whitespace-pre-line">
+    <div className="whitespace-pre-line break-words text-sm text-gray-800 dark:text-gray-200">
       {content}
     </div>
   );
@@ -251,48 +251,42 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
   }
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-200">
-      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Progress Notes</h2>
-      
-      {/* Add new note form */}
-      <form onSubmit={handleAddNote} className="mb-6">
-        <div className="flex items-start">
-          <textarea
-            value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
-            placeholder="Add a new progress note..."
-            className="flex-grow p-2 border rounded-lg resize-y min-h-24 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            required
-          />
-          <button
-            type="submit"
-            className="ml-2 mt-1 bg-blue-500 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition-colors"
+    <div className="space-y-4">
+      {/* Add form */}
+      <form onSubmit={handleAddNote} className="space-y-2">
+        <textarea 
+          value={newNote} 
+          onChange={(e) => setNewNote(e.target.value)} 
+          placeholder="Add a new note..."
+          className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-y min-h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+          required
+        />
+        <div className="flex justify-end">
+          <button 
+            type="submit" 
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
           >
-            Add
+            Add Note
           </button>
         </div>
       </form>
       
-      {/* Notes list as a table */}
-      {student.notes.length === 0 ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          No notes added yet. Add your first note above.
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
+      {/* Notes table */}
+      {student?.notes && student.notes.length > 0 ? (
+        <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-md">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
                   Date
                 </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Notes
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Content
                 </th>
-                <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-16">
+                <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-16">
                   Edit
                 </th>
-                <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-16">
+                <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-16">
                   Delete
                 </th>
               </tr>
@@ -313,25 +307,25 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
                   const actualIndex = student.notes.findIndex(n => n.id === note.id);
                   return editingNoteIndex === actualIndex ? (
                     <tr key={note.id} className="bg-blue-50 dark:bg-blue-900">
-                      <td colSpan={4} className="px-3 py-4">
+                      <td colSpan={4} className="px-4 py-4">
                         <form onSubmit={handleUpdateNote} className="space-y-2">
                           <textarea
                             value={editNoteContent}
                             onChange={(e) => setEditNoteContent(e.target.value)}
-                            className="w-full p-2 border rounded-lg resize-y min-h-24 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            className="w-full p-3 border rounded-lg resize-y min-h-32 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                           />
                           <div className="flex space-x-2">
                             <button
                               type="submit"
-                              className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-sm"
+                              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm"
                             >
                               Save
                             </button>
                             <button
                               type="button"
                               onClick={() => setEditingNoteIndex(null)}
-                              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-3 rounded text-sm"
+                              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-sm"
                             >
                               Cancel
                             </button>
@@ -341,16 +335,16 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
                     </tr>
                   ) : (
                     <tr key={note.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-300">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-gray-300 align-top">
                         {formatDate(note.date)}
                       </td>
-                      <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-200 whitespace-pre-line">
+                      <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-200">
                         <NoteContent content={note.content || (note as any).text} />
                       </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <td className="px-4 py-4 text-center">
                         <button
                           onClick={() => startEditingNote(actualIndex)}
-                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
                           aria-label="Edit note"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -358,10 +352,10 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
                           </svg>
                         </button>
                       </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <td className="px-4 py-4 text-center">
                         <button
                           onClick={() => handleDeleteNote(actualIndex)}
-                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900"
                           aria-label="Delete note"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -374,6 +368,10 @@ export default function StudentNotes({ studentId }: StudentNotesProps) {
                 })}
             </tbody>
           </table>
+        </div>
+      ) : (
+        <div className="p-4 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          No notes found for this student. Add your first note above.
         </div>
       )}
     </div>
