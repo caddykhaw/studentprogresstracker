@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import StatsSection from '../features/dashboard/StatsSection';
-import ThemeToggle from '../components/ui/ThemeToggle';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 
 // Mock student data - replace with actual data fetching
 interface Student {
@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
       
       <main>
         {/* Stats Section - positioned above the student list */}
-        <StatsSection totalStudents={students.length} studentsToday={studentsToday} />
+        <StatsSection />
         
         {/* Student List Section */}
         <section className="container mx-auto px-4 py-6">

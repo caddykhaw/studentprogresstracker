@@ -1,14 +1,27 @@
 import { ObjectId } from 'mongodb';
 
 export interface Student {
-  _id?: ObjectId;
   id: string;
   name: string;
+  instrument: string;
   grade: string;
-  attendance: string;
-  lastActive: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  day: string;
+  time: string;
+  contact?: string;
+  currentMaterial?: string;
+  notes: Note[];
+  lastActive?: string;
+  attendance?: string;
+}
+
+export interface Note {
+  id: string;
+  content: string;
+  date: string;
+}
+
+export interface Settings {
+  instruments: string[];
 }
 
 // Type for creating a new student (client-side)

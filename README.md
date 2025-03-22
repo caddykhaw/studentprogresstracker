@@ -1,6 +1,17 @@
 # Student Progress Tracker
 
-A modern web application for tracking student progress, built with Nuxt.js 3 and Tailwind CSS.
+A Next.js application for tracking student progress in music lessons.
+
+## Architecture
+
+This application follows a clean, modular architecture using the repository pattern and dependency injection. The key architectural principles include:
+
+- **Separation of Concerns**: Clear boundaries between UI, business logic, and data access
+- **Dependency Injection**: Components receive their dependencies rather than creating them
+- **Repository Pattern**: Data access is abstracted behind repository interfaces
+- **Caching Strategy**: Two-level caching (server-side and client-side)
+
+See the [architecture documentation](./docs/architecture.md) for more details.
 
 ## Features
 
@@ -19,34 +30,60 @@ A modern web application for tracking student progress, built with Nuxt.js 3 and
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js (v16 or later)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/student-progress-tracker.git
-   cd student-progress-tracker
-   ```
-
+1. Clone the repository
 2. Install dependencies:
-   ```bash
+   ```
    npm install
-   # or
-   yarn install
    ```
-
-3. Run the development server:
-   ```bash
+3. Create a `.env.local` file with your MongoDB connection string:
+   ```
+   MONGODB_URI=mongodb+srv://...
+   ```
+4. Run the development server:
+   ```
    npm run dev
-   # or
-   yarn dev
    ```
 
-4. Open your browser and navigate to `http://localhost:3000`
+## Key Features
+
+- Student management
+- Music library with songs
+- Progress tracking
+- Performance analytics
+- Import/Export functionality
+
+## Project Structure
+
+```
+├── app/                # Next.js App Router
+│   ├── api/            # API routes
+│   └── components/     # UI components
+│
+├── lib/                # Core application code
+│   ├── hooks/          # React hooks
+│   ├── services/       # Service layer
+│   │   ├── cacheService.ts        # Caching functionality
+│   │   ├── databaseService.ts     # Database connectivity
+│   │   ├── songRepository.ts      # Song data access
+│   │   └── clientSongService.ts   # Client-side API service
+│   ├── types.ts        # TypeScript type definitions
+│   └── utils.ts        # Utility functions
+│
+└── docs/               # Documentation
+    ├── architecture.md  # Architecture documentation
+    └── api-caching.md   # API caching documentation
+```
+
+## API Structure
+
+The application uses a RESTful API structure for data access. API routes are designed to be thin controllers that delegate to the repository layer, which handles data access and caching.
+
+## Contributing
+
+1. Follow the existing architecture and patterns
+2. Use interfaces for dependency injection
+3. Write tests for new features
+4. Document architecture decisions
 
 ## Troubleshooting
 

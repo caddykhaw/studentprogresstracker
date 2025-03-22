@@ -2,7 +2,7 @@
 // Export all components from a central location
 
 export { default as StatsSection } from '../features/dashboard/StatsSection';
-export { default as ThemeToggle } from '../components/ui/ThemeToggle';
+export { ThemeToggle } from '../components/ui/ThemeToggle';
 
 // Add other component exports as needed 
 export { default as Header } from '../components/layout/Header';

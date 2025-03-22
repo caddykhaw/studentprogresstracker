@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { SongRepositoryFactory } from '@/lib/services/songRepository';
 import { Song, ApiResponse, SongUpdate } from '@/lib/types';
 
 // GET - Fetch a specific song
@@ -9,10 +9,10 @@ export async function GET(
 ) {
   try {
     const songId = params.id;
-    const { db } = await connectToDatabase();
+    const songRepository = SongRepositoryFactory.getRepository();
     
     // Find the song
-    const song = await db.collection('songs').findOne({ id: songId });
+    const song = await songRepository.findById(songId);
     
     if (!song) {
       return NextResponse.json<ApiResponse<Song>>(
@@ -22,7 +22,7 @@ export async function GET(
     }
     
     return NextResponse.json<ApiResponse<Song>>({
-      data: song as unknown as Song
+      data: song
     });
   } catch (error) {
     console.error('Failed to fetch song:', error);
@@ -41,41 +41,20 @@ export async function PUT(
   try {
     const songId = params.id;
     const data = await request.json() as SongUpdate;
+    const songRepository = SongRepositoryFactory.getRepository();
     
-    const { db } = await connectToDatabase();
+    // Update the song
+    const updatedSong = await songRepository.update(songId, data);
     
-    // Check if song exists
-    const existingSong = await db.collection('songs').findOne({ id: songId });
-    
-    if (!existingSong) {
+    if (!updatedSong) {
       return NextResponse.json<ApiResponse<Song>>(
         { error: 'Song not found' },
         { status: 404 }
       );
     }
     
-    // Update fields
-    const updateData: Partial<Song> = {};
-    if (data.title !== undefined) updateData.title = data.title;
-    if (data.artist !== undefined) updateData.artist = data.artist;
-    if (data.keyLetter !== undefined) updateData.keyLetter = data.keyLetter;
-    if (data.keyModifier !== undefined) updateData.keyModifier = data.keyModifier;
-    if (data.keyMode !== undefined) updateData.keyMode = data.keyMode;
-    if (data.bpm !== undefined) updateData.bpm = data.bpm;
-    if (data.youtubeUrl !== undefined) updateData.youtubeUrl = data.youtubeUrl;
-    
-    updateData.updatedAt = new Date();
-    
-    const result = await db.collection('songs').updateOne(
-      { id: songId },
-      { $set: updateData }
-    );
-    
-    // Get updated song
-    const updatedSong = await db.collection('songs').findOne({ id: songId });
-    
     return NextResponse.json<ApiResponse<Song>>({
-      data: updatedSong as unknown as Song
+      data: updatedSong
     });
   } catch (error) {
     console.error('Failed to update song:', error);
@@ -93,20 +72,17 @@ export async function DELETE(
 ) {
   try {
     const songId = params.id;
-    const { db } = await connectToDatabase();
+    const songRepository = SongRepositoryFactory.getRepository();
     
-    // Check if song exists
-    const existingSong = await db.collection('songs').findOne({ id: songId });
+    // Delete the song
+    const success = await songRepository.delete(songId);
     
-    if (!existingSong) {
+    if (!success) {
       return NextResponse.json<ApiResponse<boolean>>(
         { error: 'Song not found' },
         { status: 404 }
       );
     }
-    
-    // Delete song
-    await db.collection('songs').deleteOne({ id: songId });
     
     return NextResponse.json<ApiResponse<boolean>>({
       data: true

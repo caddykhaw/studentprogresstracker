@@ -120,7 +120,7 @@ export default function EditStudentModal() {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
+            className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary ${
               errors.name ? 'border-error' : ''
             }`}
           />
@@ -136,7 +136,7 @@ export default function EditStudentModal() {
             name="instrument"
             value={formData.instrument}
             onChange={handleChange}
-            className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
+            className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary ${
               errors.instrument ? 'border-error' : ''
             }`}
           >
@@ -159,7 +159,7 @@ export default function EditStudentModal() {
             name="grade"
             value={formData.grade}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary"
+            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary"
           >
             <option value="">Select a grade/level</option>
             <option value="Beginner">Beginner</option>
@@ -186,7 +186,7 @@ export default function EditStudentModal() {
               name="day"
               value={formData.day}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
+              className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary ${
                 errors.day ? 'border-error' : ''
               }`}
             >
@@ -209,7 +209,7 @@ export default function EditStudentModal() {
               name="time"
               value={formData.time}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary ${
+              className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary ${
                 errors.time ? 'border-error' : ''
               }`}
             />
@@ -227,7 +227,7 @@ export default function EditStudentModal() {
             name="contact"
             value={formData.contact}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary"
+            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary"
             placeholder="Phone number or email"
           />
         </div>
@@ -242,7 +242,7 @@ export default function EditStudentModal() {
             value={formData.currentMaterial}
             onChange={handleChange}
             rows={3}
-            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark shadow-sm focus:border-primary focus:ring-primary"
+            className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary"
             placeholder="Books, pieces, or exercises the student is working on"
           />
         </div>

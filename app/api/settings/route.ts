@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Setting } from '@/lib/types';
 import { z } from 'zod';
+import { ObjectId } from 'mongodb';
 
 // Setting validation schema
 const settingSchema = z.object({
@@ -20,17 +21,22 @@ const NO_CACHE_HEADERS = {
 // GET all settings
 export async function GET() {
   try {
-    console.log('🔧 Fetching all settings');
     const { db } = await connectToDatabase();
     
-    const settings = await db.collection<Setting>('settings').find({}).toArray();
+    // Get settings from MongoDB, create default if not exists
+    let settings = await db.collection('settings').findOne({});
     
-    return NextResponse.json(settings, { headers: NO_CACHE_HEADERS });
+    if (!settings) {
+      settings = { _id: new ObjectId(), instruments: [] };
+      await db.collection('settings').insertOne(settings);
+    }
+    
+    return NextResponse.json(settings);
   } catch (error) {
-    console.error('❌ Error fetching settings:', error);
+    console.error('Error fetching settings:', error);
     return NextResponse.json(
       { error: 'Failed to fetch settings' },
-      { status: 500, headers: NO_CACHE_HEADERS }
+      { status: 500 }
     );
   }
 }

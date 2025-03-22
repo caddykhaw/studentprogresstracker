@@ -17,16 +17,20 @@ const NO_CACHE_HEADERS = {
   'Expires': '0'
 };
 
+interface RouteParams {
+  id: string;
+}
+
 // GET a specific setting by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: RouteParams }
 ) {
   try {
-    console.log(`🔍 Fetching setting with ID: ${params.id}`);
+    console.log(`🔍 Fetching setting with ID: ${context.params.id}`);
     const { db } = await connectToDatabase();
     
-    const setting = await db.collection<Setting>('settings').findOne({ id: params.id });
+    const setting = await db.collection<Setting>('settings').findOne({ id: context.params.id });
     
     if (!setting) {
       return NextResponse.json(
@@ -48,10 +52,10 @@ export async function GET(
 // PUT (update) a specific setting by ID
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: RouteParams }
 ) {
   try {
-    console.log(`✏️ Updating setting with ID: ${params.id}`);
+    console.log(`✏️ Updating setting with ID: ${context.params.id}`);
     const body = await request.json();
     
     // Validate request body
@@ -66,7 +70,7 @@ export async function PUT(
     const { db } = await connectToDatabase();
     
     // Check if setting exists
-    const existingSetting = await db.collection<Setting>('settings').findOne({ id: params.id });
+    const existingSetting = await db.collection<Setting>('settings').findOne({ id: context.params.id });
     
     if (!existingSetting) {
       return NextResponse.json(
@@ -88,7 +92,7 @@ export async function PUT(
     }
     
     const result = await db.collection<Setting>('settings').updateOne(
-      { id: params.id },
+      { id: context.params.id },
       { $set: validationResult.data }
     );
     
@@ -100,7 +104,7 @@ export async function PUT(
     }
     
     // Get the updated setting
-    const updatedSetting = await db.collection<Setting>('settings').findOne({ id: params.id });
+    const updatedSetting = await db.collection<Setting>('settings').findOne({ id: context.params.id });
     
     return NextResponse.json(
       { message: 'Setting updated successfully', setting: updatedSetting },
@@ -118,13 +122,13 @@ export async function PUT(
 // DELETE a specific setting by ID
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: RouteParams }
 ) {
   try {
-    console.log(`🗑️ Deleting setting with ID: ${params.id}`);
+    console.log(`🗑️ Deleting setting with ID: ${context.params.id}`);
     const { db } = await connectToDatabase();
     
-    const result = await db.collection<Setting>('settings').deleteOne({ id: params.id });
+    const result = await db.collection<Setting>('settings').deleteOne({ id: context.params.id });
     
     if (result.deletedCount === 0) {
       return NextResponse.json(

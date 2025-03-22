@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { SongRepositoryFactory } from '@/lib/services/songRepository';
 import { Song, ApiResponse } from '@/lib/types';
 import { z } from 'zod';
 
@@ -17,17 +17,28 @@ const songSchema = z.object({
 // GET all songs
 export async function GET() {
   try {
-    const { db } = await connectToDatabase();
+    const songRepository = SongRepositoryFactory.getRepository();
+    console.log('API: Fetching all songs...');
     
-    const songs = await db.collection<Song>('songs').find({}).toArray();
+    const songs = await songRepository.findAll();
     
-    return NextResponse.json<ApiResponse<Song[]>>({
-      data: songs
-    });
+    return NextResponse.json(
+      {
+        data: songs,
+        count: songs.length,
+        timestamp: new Date().toISOString()
+      },
+      {
+        headers: {
+          // Add Cache-Control header to help browsers/CDNs cache the response
+          'Cache-Control': 'public, max-age=60, s-maxage=300',
+        }
+      }
+    );
   } catch (error) {
-    console.error('Failed to fetch songs:', error);
-    return NextResponse.json<ApiResponse<Song[]>>(
-      { error: 'Failed to fetch songs' },
+    console.error('API: Failed to fetch songs:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch songs', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -47,17 +58,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { db } = await connectToDatabase();
+    const songRepository = SongRepositoryFactory.getRepository();
     
-    // Create new song object
-    const newSong: Song = {
-      id: crypto.randomUUID(),
-      ...validationResult.data,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    await db.collection<Song>('songs').insertOne(newSong);
+    // Create new song
+    const newSong = await songRepository.create(validationResult.data);
     
     return NextResponse.json<ApiResponse<Song>>(
       { data: newSong },

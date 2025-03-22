@@ -60,4 +60,7 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
   details?: any;
+  source?: 'cache' | 'database';
+  count?: number;
+  timestamp?: string;
 } 

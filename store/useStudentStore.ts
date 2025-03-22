@@ -156,55 +156,130 @@ export const useStudentStore = create<StudentState>()(
         students: state.students.filter(s => s.id !== studentId)
       })),
       
-      addNote: ({ studentId, note }) => set((state) => {
-        const index = state.students.findIndex(s => s.id === studentId);
-        if (index === -1) return state;
-        
-        const newStudents = [...state.students];
-        newStudents[index] = {
-          ...newStudents[index],
-          notes: [...newStudents[index].notes, note]
-        };
-        
-        return { students: newStudents };
-      }),
+      addNote: async ({ studentId, note }) => {
+        try {
+          // Make API call first
+          const response = await fetch(`/api/students/${studentId}/notes`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: note.content }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to add note');
+          }
+
+          const { note: savedNote } = await response.json();
+
+          // Update local state with the saved note from the server
+          set((state) => {
+            const index = state.students.findIndex(s => s.id === studentId);
+            if (index === -1) return state;
+
+            const newStudents = [...state.students];
+            newStudents[index] = {
+              ...newStudents[index],
+              notes: [...(newStudents[index].notes || []), savedNote]
+            };
+
+            return { students: newStudents };
+          });
+        } catch (error) {
+          console.error('Failed to add note:', error);
+          throw error;
+        }
+      },
       
-      updateNote: ({ studentId, noteIndex, text }) => set((state) => {
-        const studentIndex = state.students.findIndex(s => s.id === studentId);
-        if (studentIndex === -1) return state;
-        
-        const student = state.students[studentIndex];
-        if (!student.notes[noteIndex]) return state;
-        
-        const newNotes = [...student.notes];
-        newNotes[noteIndex] = { ...newNotes[noteIndex], content: text };
-        
-        const newStudents = [...state.students];
-        newStudents[studentIndex] = {
-          ...student,
-          notes: newNotes
-        };
-        
-        return { students: newStudents };
-      }),
+      updateNote: async ({ studentId, noteIndex, text }) => {
+        try {
+          const state = get();
+          const student = state.students.find(s => s.id === studentId);
+          if (!student?.notes?.[noteIndex]) return;
+
+          const noteId = student.notes[noteIndex].id;
+
+          // Make API call first
+          const response = await fetch(`/api/students/${studentId}/notes/${noteId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: text }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to update note');
+          }
+
+          const { note: updatedNote } = await response.json();
+
+          // Update local state with the response from the server
+          set((state) => {
+            const studentIndex = state.students.findIndex(s => s.id === studentId);
+            if (studentIndex === -1) return state;
+
+            const student = state.students[studentIndex];
+            if (!student.notes[noteIndex]) return state;
+
+            const newNotes = [...student.notes];
+            newNotes[noteIndex] = updatedNote;
+
+            const newStudents = [...state.students];
+            newStudents[studentIndex] = {
+              ...student,
+              notes: newNotes
+            };
+
+            return { students: newStudents };
+          });
+        } catch (error) {
+          console.error('Failed to update note:', error);
+          throw error;
+        }
+      },
       
-      deleteNote: ({ studentId, noteIndex }) => set((state) => {
-        const studentIndex = state.students.findIndex(s => s.id === studentId);
-        if (studentIndex === -1) return state;
-        
-        const student = state.students[studentIndex];
-        if (!student.notes[noteIndex]) return state;
-        
-        const newNotes = student.notes.filter((_, i) => i !== noteIndex);
-        
-        const newStudents = [...state.students];
-        newStudents[studentIndex] = {
-          ...student,
-          notes: newNotes
-        };
-        
-        return { students: newStudents };
-      }),
+      deleteNote: async ({ studentId, noteIndex }) => {
+        try {
+          const state = get();
+          const student = state.students.find(s => s.id === studentId);
+          if (!student?.notes?.[noteIndex]) return;
+
+          const noteId = student.notes[noteIndex].id;
+
+          // Make API call first
+          const response = await fetch(`/api/students/${studentId}/notes/${noteId}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to delete note');
+          }
+
+          // Update local state after successful API call
+          set((state) => {
+            const studentIndex = state.students.findIndex(s => s.id === studentId);
+            if (studentIndex === -1) return state;
+
+            const student = state.students[studentIndex];
+            if (!student.notes[noteIndex]) return state;
+
+            const newNotes = student.notes.filter((_, i) => i !== noteIndex);
+
+            const newStudents = [...state.students];
+            newStudents[studentIndex] = {
+              ...student,
+              notes: newNotes
+            };
+
+            return { students: newStudents };
+          });
+        } catch (error) {
+          console.error('Failed to delete note:', error);
+          throw error;
+        }
+      },
       
       addInstrument: (instrument) => {
         const state = get();

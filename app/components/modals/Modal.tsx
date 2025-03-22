@@ -10,6 +10,7 @@ interface ModalProps {
   title: string
   children: React.ReactNode
   size?: 'md' | 'lg' | 'xl' // New size prop with default medium
+  showCloseButton?: boolean // New prop to control close button visibility
 }
 
 export default function Modal({ 
@@ -17,7 +18,8 @@ export default function Modal({
   onClose, 
   title, 
   children, 
-  size = 'md' // Default to medium size
+  size = 'md', // Default to medium size
+  showCloseButton = true // Default to showing close button
 }: ModalProps) {
   const cancelButtonRef = useRef(null)
 
@@ -42,10 +44,10 @@ export default function Modal({
   }, [onClose])
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="relative z-10"
+        className="relative z-50"
         initialFocus={cancelButtonRef}
         onClose={onClose}
       >
@@ -76,16 +78,18 @@ export default function Modal({
                 className={`relative transform overflow-hidden rounded-lg bg-bg-light dark:bg-bg-dark text-left shadow-xl transition-all sm:my-8 sm:w-full ${sizeClasses[size]}`}
               >
                 <div className="bg-bg-light dark:bg-bg-dark px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                  <div className="absolute top-0 right-0 pt-4 pr-4">
-                    <button
-                      type="button"
-                      className="rounded-md bg-bg-light dark:bg-bg-dark text-text-muted-dark hover:text-text-dark dark:hover:text-text-muted-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bg-dark transition-colors"
-                      onClick={onClose}
-                    >
-                      <span className="sr-only">Close</span>
-                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                  </div>
+                  {showCloseButton && (
+                    <div className="absolute top-0 right-0 pt-4 pr-4">
+                      <button
+                        type="button"
+                        className="rounded-md bg-bg-light dark:bg-bg-dark text-text-muted-dark hover:text-text-dark dark:hover:text-text-muted-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bg-dark transition-colors"
+                        onClick={onClose}
+                      >
+                        <span className="sr-only">Close</span>
+                        <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                      </button>
+                    </div>
+                  )}
                   <div>
                     <Dialog.Title
                       as="h3"
@@ -101,6 +105,6 @@ export default function Modal({
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   )
 } 

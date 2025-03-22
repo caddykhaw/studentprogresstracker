@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 
 interface UIState {
-  settingsModalOpen: boolean
+  isSettingsModalOpen: boolean
+  isSongModalOpen: boolean
   studentProfileModalOpen: boolean
   addStudentModalOpen: boolean
   editStudentModalOpen: boolean
@@ -9,7 +10,12 @@ interface UIState {
   editNoteModalOpen: boolean
   
   // Actions
-  setSettingsModalOpen: (isOpen: boolean) => void
+  setSettingsModalOpen: (open: boolean) => void
+  setSongModalOpen: (open: boolean) => void
+  openSettingsModal: () => void
+  closeSettingsModal: () => void
+  openSongModal: () => void
+  closeSongModal: () => void
   setStudentProfileModalOpen: (isOpen: boolean) => void
   setAddStudentModalOpen: (isOpen: boolean) => void
   setEditStudentModalOpen: (isOpen: boolean) => void
@@ -18,14 +24,20 @@ interface UIState {
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  settingsModalOpen: false,
+  isSettingsModalOpen: false,
+  isSongModalOpen: false,
   studentProfileModalOpen: false,
   addStudentModalOpen: false,
   editStudentModalOpen: false,
   addNoteModalOpen: false,
   editNoteModalOpen: false,
   
-  setSettingsModalOpen: (isOpen) => set({ settingsModalOpen: isOpen }),
+  setSettingsModalOpen: (open) => set({ isSettingsModalOpen: open }),
+  setSongModalOpen: (open) => set({ isSongModalOpen: open }),
+  openSettingsModal: () => set({ isSettingsModalOpen: true }),
+  closeSettingsModal: () => set({ isSettingsModalOpen: false }),
+  openSongModal: () => set({ isSongModalOpen: true }),
+  closeSongModal: () => set({ isSongModalOpen: false }),
   setStudentProfileModalOpen: (isOpen) => set({ studentProfileModalOpen: isOpen }),
   setAddStudentModalOpen: (isOpen) => set({ addStudentModalOpen: isOpen }),
   setEditStudentModalOpen: (isOpen) => set({ editStudentModalOpen: isOpen }),
