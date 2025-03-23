@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, WriteConcern } from 'mongodb';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Please add your MongoDB URI to .env.local');
@@ -7,9 +7,15 @@ if (!process.env.MONGODB_URI) {
 const uri = process.env.MONGODB_URI;
 const options = {
   maxPoolSize: 10,
-  serverSelectionTimeoutMS: 5000,
+  serverSelectionTimeoutMS: 10000,
   socketTimeoutMS: 45000,
-};
+  connectTimeoutMS: 10000,
+  retryWrites: true,
+  retryReads: true,
+  writeConcern: new WriteConcern('majority', 2500),
+  keepAlive: true,
+  keepAliveInitialDelay: 300000
+} as const;
 
 let client;
 let clientPromise: Promise<MongoClient>;

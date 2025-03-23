@@ -93,6 +93,7 @@ export default function SongModal() {
       isOpen={isSongModalOpen} 
       onClose={handleClose}
       title={currentSongId ? 'Edit Song' : 'Add New Song'}
+      isStacked={true}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -142,7 +143,7 @@ export default function SongModal() {
             </label>
             <select
               id="keyModifier"
-              value={formData.keyModifier}
+              value={formData.keyModifier || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, keyModifier: e.target.value }))}
               className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary"
             >
@@ -158,7 +159,7 @@ export default function SongModal() {
             </label>
             <select
               id="keyMode"
-              value={formData.keyMode}
+              value={formData.keyMode || 'major'}
               onChange={(e) => setFormData(prev => ({ ...prev, keyMode: e.target.value }))}
               className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary"
             >

@@ -9,7 +9,7 @@ Object.defineProperty(exports, "verifyAndLint", {
     }
 });
 const _picocolors = require("./picocolors");
-const _jestworker = require("next/dist/compiled/jest-worker");
+const _worker = require("./worker");
 const _fs = require("fs");
 const _path = require("path");
 const _constants = require("./constants");
@@ -24,13 +24,14 @@ function _interop_require_default(obj) {
 async function verifyAndLint(dir, cacheLocation, configLintDirs, enableWorkerThreads, telemetry) {
     let lintWorkers;
     try {
-        lintWorkers = new _jestworker.Worker(require.resolve('./eslint/runLintCheck'), {
+        lintWorkers = new _worker.Worker(require.resolve('./eslint/runLintCheck'), {
+            exposedMethods: [
+                'runLintCheck'
+            ],
             numWorkers: 1,
             enableWorkerThreads,
             maxRetries: 0
         });
-        lintWorkers.getStdout().pipe(process.stdout);
-        lintWorkers.getStderr().pipe(process.stderr);
         const lintDirs = (configLintDirs ?? _constants.ESLINT_DEFAULT_DIRS).reduce((res, d)=>{
             const currDir = (0, _path.join)(dir, d);
             if (!(0, _fs.existsSync)(currDir)) return res;
@@ -52,7 +53,11 @@ async function verifyAndLint(dir, cacheLocation, configLintDirs, enableWorkerThr
         }
         if (typeof lintResults !== 'string' && (lintResults == null ? void 0 : lintResults.isError) && lintOutput) {
             await telemetry.flush();
-            throw new _compileerror.CompileError(lintOutput);
+            throw Object.defineProperty(new _compileerror.CompileError(lintOutput), "__NEXT_ERROR_CODE", {
+                value: "E394",
+                enumerable: false,
+                configurable: true
+            });
         }
         if (lintOutput) {
             console.log(lintOutput);

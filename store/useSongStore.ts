@@ -22,27 +22,34 @@ export const useSongStore = create<SongState>((set, get) => ({
   setCurrentSongId: (id) => set({ currentSongId: id }),
 
   fetchSongs: async () => {
-    // Prevent multiple concurrent fetch requests
-    if (get().isLoading) {
-      console.log('Store: Already fetching songs, skipping duplicate request')
-      return
-    }
-    
+    console.log('Store: Starting to fetch songs...');
     set({ isLoading: true, error: null })
+    
     try {
-      console.log('Store: Starting to fetch songs...')
+      console.log('Store: Making API request to /api/songs');
       const response = await fetch('/api/songs')
-      console.log('Store: Got response:', response.status)
+      console.log('Store: Received response with status:', response.status);
       
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to fetch songs')
+        const errorData = await response.json();
+        console.error('Store: API returned error status:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
+        throw new Error(errorData.error || 'Failed to fetch songs');
       }
       
       const responseData = await response.json()
-      console.log('Store: Response data:', responseData)
+      console.log('Store: Parsed response data:', {
+        success: responseData.success,
+        dataExists: !!responseData.data,
+        isArray: Array.isArray(responseData.data),
+        length: responseData.data?.length
+      });
       
       if (!responseData.data || !Array.isArray(responseData.data)) {
+        console.error('Store: Invalid response format:', responseData)
         throw new Error('Invalid response format: expected data array')
       }
       
@@ -53,7 +60,10 @@ export const useSongStore = create<SongState>((set, get) => ({
       })
       console.log('Store: Updated songs in state:', responseData.data.length, 'songs')
     } catch (error) {
-      console.error('Store: Error fetching songs:', error)
+      console.error('Store: Error fetching songs:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch songs', 
         isLoading: false,

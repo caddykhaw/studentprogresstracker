@@ -1,4 +1,4 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, Db, WriteConcern } from 'mongodb';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
@@ -34,7 +34,17 @@ export class MongoDBService implements DatabaseService {
   }
 
   private initializeClient(): void {
-    const options = {};
+    const options = {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
+      retryWrites: true,
+      retryReads: true,
+      writeConcern: new WriteConcern('majority', 2500),
+      keepAlive: true,
+      keepAliveInitialDelay: 300000
+    } as const;
     
     if (process.env.NODE_ENV === 'development') {
       // In development mode, use a global variable so that the value
@@ -72,13 +82,23 @@ export class MongoDBService implements DatabaseService {
       const db = client.db(this.dbName);
       
       // Test the connection
-      const collections = await db.listCollections().toArray();
-      console.log('MongoDB: Available collections:', collections.map(c => c.name));
+      try {
+        const collections = await db.listCollections().toArray();
+        console.log('MongoDB: Available collections:', collections.map(c => c.name));
+      } catch (e) {
+        console.error('MongoDB: Failed to list collections:', e);
+        throw new Error('Failed to list collections: ' + (e instanceof Error ? e.message : String(e)));
+      }
       
       return { client, db };
     } catch (error) {
-      console.error('MongoDB: Failed to connect:', error);
-      throw error;
+      console.error('MongoDB: Connection error details:', {
+        error: error instanceof Error ? error.message : String(error),
+        uri: this.uri.replace(/\/\/[^@]+@/, '//****:****@'), // Hide credentials
+        dbName: this.dbName,
+        nodeEnv: process.env.NODE_ENV
+      });
+      throw new Error('Failed to connect to MongoDB: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 }

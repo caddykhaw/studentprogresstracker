@@ -3,11 +3,29 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Music4, ArrowUpDown } from 'lucide-react'
+import { Search, Music4, ArrowUpDown, Eye } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { useSongStore } from '@/store/useSongStore'
 import { useUIStore } from '@/store/useUIStore'
 import { Song } from '@/lib/types'
+import SongDetailModal from '@/app/features/songs/modals/SongDetailModal'
+import SongModal from '@/app/features/songs/modals/SongModal'
+
+function getYouTubeVideoId(url: string): string | null {
+  try {
+    const urlObj = new URL(url)
+    if (urlObj.hostname === 'youtu.be') {
+      return urlObj.pathname.slice(1)
+    }
+    if (urlObj.hostname === 'www.youtube.com' || urlObj.hostname === 'youtube.com') {
+      const searchParams = new URLSearchParams(urlObj.search)
+      return searchParams.get('v')
+    }
+  } catch (e) {
+    console.error('Error parsing YouTube URL:', e)
+  }
+  return null
+}
 
 export default function SongsTable() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -22,6 +40,7 @@ export default function SongsTable() {
   const fetchSongs = useSongStore(state => state.fetchSongs)
   const setCurrentSongId = useSongStore(state => state.setCurrentSongId)
   const openSongModal = useUIStore(state => state.openSongModal)
+  const openSongDetailModal = useUIStore(state => state.openSongDetailModal)
 
   // Only fetch songs on initial mount
   useEffect(() => {
@@ -56,6 +75,11 @@ export default function SongsTable() {
   const handleEdit = (songId: string) => {
     setCurrentSongId(songId)
     openSongModal()
+  }
+
+  const handleViewDetails = (songId: string) => {
+    setCurrentSongId(songId)
+    openSongDetailModal()
   }
 
   const sortedAndFilteredSongs = Array.isArray(songs) ? songs
@@ -101,6 +125,7 @@ export default function SongsTable() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border-light dark:border-border-dark">
+                <th className="px-6 py-4 text-left w-48">Video</th>
                 <th className="px-6 py-4 text-left">
                   <button
                     onClick={() => handleSort('title')}
@@ -152,19 +177,19 @@ export default function SongsTable() {
             <tbody className="bg-white dark:bg-black">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                     Loading songs...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-red-500">
+                  <td colSpan={7} className="px-6 py-4 text-center text-red-500">
                     Error loading songs: {error}
                   </td>
                 </tr>
               ) : !sortedAndFilteredSongs || !sortedAndFilteredSongs[0] ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                     No songs found. {searchQuery ? 'Try a different search term.' : 'Add some songs to get started!'}
                   </td>
                 </tr>
@@ -172,24 +197,29 @@ export default function SongsTable() {
                 sortedAndFilteredSongs.map((song) => (
                   <tr
                     key={song.id}
-                    className="border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-900"
+                    onClick={() => handleViewDetails(song.id)}
+                    className="border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer transition-colors duration-150"
                   >
                     <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        {song.youtubeUrl ? (
-                          <a
-                            href={song.youtubeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:text-primary-dark mr-2"
-                          >
-                            <Music4 className="h-4 w-4" />
-                          </a>
-                        ) : (
-                          <span className="w-6" />
-                        )}
-                        <span className="dark:text-white">{song.title}</span>
-                      </div>
+                      {song.youtubeUrl ? (
+                        <div className="w-40 aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          <iframe
+                            src={`https://www.youtube.com/embed/${getYouTubeVideoId(song.youtubeUrl)}`}
+                            title={`${song.title} by ${song.artist}`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-full"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-40 aspect-video rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">No video</p>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="dark:text-white">{song.title}</span>
                     </td>
                     <td className="px-6 py-4 dark:text-white">{song.artist}</td>
                     <td className="px-6 py-4 dark:text-white">
@@ -203,7 +233,10 @@ export default function SongsTable() {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleEdit(song.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(song.id);
+                        }}
                         className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                       >
                         Edit
@@ -216,6 +249,9 @@ export default function SongsTable() {
           </table>
         </div>
       </div>
+
+      <SongDetailModal />
+      <SongModal />
     </>
   )
 } 

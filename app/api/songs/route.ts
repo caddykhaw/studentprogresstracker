@@ -2,6 +2,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SongRepositoryFactory } from '@/lib/services/songRepository';
 import { Song, ApiResponse } from '@/lib/types';
 import { z } from 'zod';
+import { MongoClient } from 'mongodb';
+
+// Helper function to check MongoDB connection
+async function checkMongoConnection() {
+  console.log('Attempting MongoDB connection...');
+  try {
+    const uri = process.env.MONGODB_URI;
+    console.log('MongoDB URI exists:', !!uri);
+    
+    if (!uri) {
+      throw new Error('MONGODB_URI is not defined in environment variables');
+    }
+    
+    const client = new MongoClient(uri);
+    console.log('Attempting to connect to MongoDB...');
+    await client.connect();
+    console.log('Connected to MongoDB successfully');
+    await client.db('admin').command({ ping: 1 });
+    console.log('MongoDB ping successful');
+    await client.close();
+    return true;
+  } catch (error) {
+    console.error('MongoDB Connection Test Failed:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    return false;
+  }
+}
 
 // Song validation schema
 const songSchema = z.object({
@@ -15,32 +44,37 @@ const songSchema = z.object({
 });
 
 // GET all songs
-export async function GET() {
+export async function GET(request: NextRequest) {
+  console.log('GET /api/songs - Starting request handling');
   try {
+    // Check MongoDB connection first
+    const isConnected = await checkMongoConnection();
+    console.log('MongoDB connection check result:', isConnected);
+
+    if (!isConnected) {
+      throw new Error('Failed to connect to MongoDB');
+    }
+
     const songRepository = SongRepositoryFactory.getRepository();
-    console.log('API: Fetching all songs...');
-    
+    console.log('Song repository created successfully');
+
     const songs = await songRepository.findAll();
-    
-    return NextResponse.json(
-      {
-        data: songs,
-        count: songs.length,
-        timestamp: new Date().toISOString()
-      },
-      {
-        headers: {
-          // Add Cache-Control header to help browsers/CDNs cache the response
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        }
-      }
-    );
+    console.log('Songs retrieved successfully, count:', songs.length);
+
+    return NextResponse.json({
+      success: true,
+      data: songs
+    });
   } catch (error) {
-    console.error('API: Failed to fetch songs:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch songs', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    console.error('GET /api/songs - Error:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred'
+    }, { status: 500 });
   }
 }
 

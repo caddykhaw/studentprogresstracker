@@ -6,6 +6,7 @@ import { useUIStore } from '@/store/useUIStore';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import SongModal from '@/app/features/songs/modals/SongModal';
+import SongDetailModal from '@/app/features/songs/modals/SongDetailModal';
 import SongsTable from '@/app/features/songs/components/SongsTable';
 import { SettingsModal } from '@/app/lib/AppComponents';
 
@@ -45,6 +46,7 @@ export default function SongsPage() {
       )}
 
       <SongModal />
+      <SongDetailModal />
       <SettingsModal />
     </div>
   );

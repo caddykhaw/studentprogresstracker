@@ -3,6 +3,7 @@ import { create } from 'zustand'
 interface UIState {
   isSettingsModalOpen: boolean
   isSongModalOpen: boolean
+  isSongDetailModalOpen: boolean
   studentProfileModalOpen: boolean
   addStudentModalOpen: boolean
   editStudentModalOpen: boolean
@@ -12,10 +13,13 @@ interface UIState {
   // Actions
   setSettingsModalOpen: (open: boolean) => void
   setSongModalOpen: (open: boolean) => void
+  setSongDetailModalOpen: (open: boolean) => void
   openSettingsModal: () => void
   closeSettingsModal: () => void
   openSongModal: () => void
   closeSongModal: () => void
+  openSongDetailModal: () => void
+  closeSongDetailModal: () => void
   setStudentProfileModalOpen: (isOpen: boolean) => void
   setAddStudentModalOpen: (isOpen: boolean) => void
   setEditStudentModalOpen: (isOpen: boolean) => void
@@ -26,6 +30,7 @@ interface UIState {
 export const useUIStore = create<UIState>((set) => ({
   isSettingsModalOpen: false,
   isSongModalOpen: false,
+  isSongDetailModalOpen: false,
   studentProfileModalOpen: false,
   addStudentModalOpen: false,
   editStudentModalOpen: false,
@@ -34,10 +39,47 @@ export const useUIStore = create<UIState>((set) => ({
   
   setSettingsModalOpen: (open) => set({ isSettingsModalOpen: open }),
   setSongModalOpen: (open) => set({ isSongModalOpen: open }),
-  openSettingsModal: () => set({ isSettingsModalOpen: true }),
+  setSongDetailModalOpen: (open) => set({ isSongDetailModalOpen: open }),
+  
+  openSettingsModal: () => set({ 
+    isSettingsModalOpen: true,
+    isSongModalOpen: false,
+    isSongDetailModalOpen: false,
+    studentProfileModalOpen: false,
+    addStudentModalOpen: false,
+    editStudentModalOpen: false,
+    addNoteModalOpen: false,
+    editNoteModalOpen: false
+  }),
+  
   closeSettingsModal: () => set({ isSettingsModalOpen: false }),
-  openSongModal: () => set({ isSongModalOpen: true }),
+  
+  openSongModal: () => set({ 
+    isSongModalOpen: true,
+    isSettingsModalOpen: false,
+    isSongDetailModalOpen: false,
+    studentProfileModalOpen: false,
+    addStudentModalOpen: false,
+    editStudentModalOpen: false,
+    addNoteModalOpen: false,
+    editNoteModalOpen: false
+  }),
+  
   closeSongModal: () => set({ isSongModalOpen: false }),
+  
+  openSongDetailModal: () => set({ 
+    isSongDetailModalOpen: true,
+    isSettingsModalOpen: false,
+    isSongModalOpen: false,
+    studentProfileModalOpen: false,
+    addStudentModalOpen: false,
+    editStudentModalOpen: false,
+    addNoteModalOpen: false,
+    editNoteModalOpen: false
+  }),
+  
+  closeSongDetailModal: () => set({ isSongDetailModalOpen: false }),
+  
   setStudentProfileModalOpen: (isOpen) => set({ studentProfileModalOpen: isOpen }),
   setAddStudentModalOpen: (isOpen) => set({ addStudentModalOpen: isOpen }),
   setEditStudentModalOpen: (isOpen) => set({ editStudentModalOpen: isOpen }),

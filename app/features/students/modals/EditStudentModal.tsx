@@ -134,7 +134,7 @@ export default function EditStudentModal() {
           <select
             id="instrument"
             name="instrument"
-            value={formData.instrument}
+            value={formData.instrument || ''}
             onChange={handleChange}
             className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary ${
               errors.instrument ? 'border-error' : ''
@@ -157,7 +157,7 @@ export default function EditStudentModal() {
           <select
             id="grade"
             name="grade"
-            value={formData.grade}
+            value={formData.grade || ''}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary"
           >
@@ -184,7 +184,7 @@ export default function EditStudentModal() {
             <select
               id="day"
               name="day"
-              value={formData.day}
+              value={formData.day || ''}
               onChange={handleChange}
               className={`mt-1 block w-full rounded-md border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-dark dark:text-text-light shadow-sm focus:border-primary focus:ring-primary ${
                 errors.day ? 'border-error' : ''
