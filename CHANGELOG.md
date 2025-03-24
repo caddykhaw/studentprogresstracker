@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/caddykhaw/studentprogresstracker/compare/v0.2.0...v0.2.1) (2025-03-24)
+
+
+### Features
+
+* Add MongoDB to Turso migration plan and backup script ([cbee37c](https://github.com/caddykhaw/studentprogresstracker/commit/cbee37c7f02acd93113bd4c499ac5ea6728930c6))
+
 ## 0.2.0 (2025-03-22)
 
 
