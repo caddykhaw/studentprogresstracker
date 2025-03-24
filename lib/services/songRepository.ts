@@ -1,6 +1,7 @@
 import { DatabaseService, DatabaseFactory } from './databaseService';
 import { CacheService, CacheFactory } from './cacheService';
 import { Song, SongUpdate } from '@/lib/types';
+import { ObjectId } from 'mongodb';
 
 // Repository interface
 export interface SongRepository {
@@ -32,44 +33,29 @@ export class CachedSongRepository implements SongRepository {
   }
 
   async findAll(): Promise<Song[]> {
-    // Check cache first
     const cachedSongs = this.cacheService.get<Song[]>(SONG_CACHE_KEYS.ALL_SONGS);
-    if (cachedSongs) {
-      console.log('Repository: Returning cached songs data');
-      return cachedSongs;
+    if (!cachedSongs) {
+      console.debug('Cache miss: fetching songs from database');
+      const { db } = await this.dbService.connect();
+      const songs = await db.collection<Song>(this.collectionName).find({}).toArray();
+      this.cacheService.set(SONG_CACHE_KEYS.ALL_SONGS, songs);
+      return songs;
     }
-
-    // If not in cache, get from database
-    console.log('Repository: Fetching songs from database');
-    const { db } = await this.dbService.connect();
-    const songs = await db.collection<Song>(this.collectionName).find({}).toArray();
-    
-    // Increase cache duration to 5 minutes to reduce database load
-    this.cacheService.set(SONG_CACHE_KEYS.ALL_SONGS, songs, 5 * 60 * 1000);
-    
-    return songs;
+    return cachedSongs;
   }
 
   async findById(id: string): Promise<Song | null> {
-    // Check cache first
-    const cacheKey = SONG_CACHE_KEYS.SONG_BY_ID(id);
-    const cachedSong = this.cacheService.get<Song>(cacheKey);
-    
-    if (cachedSong) {
-      console.log(`Repository: Returning cached song data for id ${id}`);
-      return cachedSong;
+    const cachedSong = this.cacheService.get<Song>(SONG_CACHE_KEYS.SONG_BY_ID(id));
+    if (!cachedSong) {
+      console.debug(`Cache miss: fetching song ${id} from database`);
+      const { db } = await this.dbService.connect();
+      const song = await db.collection<Song>(this.collectionName).findOne({ id }) as Song | null;
+      if (song) {
+        this.cacheService.set(SONG_CACHE_KEYS.SONG_BY_ID(id), song);
+      }
+      return song;
     }
-    
-    // If not in cache, get from database
-    const { db } = await this.dbService.connect();
-    const song = await db.collection<Song>(this.collectionName).findOne({ id }) as Song | null;
-    
-    if (song) {
-      // Cache the result for future requests (cache for 1 minute)
-      this.cacheService.set(cacheKey, song, 60 * 1000);
-    }
-    
-    return song;
+    return cachedSong;
   }
 
   async create(songData: Omit<Song, 'id' | 'createdAt' | 'updatedAt'>): Promise<Song> {

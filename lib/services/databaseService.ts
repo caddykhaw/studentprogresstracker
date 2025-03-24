@@ -42,8 +42,9 @@ export class MongoDBService implements DatabaseService {
       retryWrites: true,
       retryReads: true,
       writeConcern: new WriteConcern('majority', 2500),
-      keepAlive: true,
-      keepAliveInitialDelay: 300000
+      // Modern connection options for MongoDB driver
+      maxIdleTimeMS: 300000, // 5 minutes
+      heartbeatFrequencyMS: 10000 // 10 seconds
     } as const;
     
     if (process.env.NODE_ENV === 'development') {

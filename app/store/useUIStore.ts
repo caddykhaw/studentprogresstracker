@@ -6,6 +6,9 @@ interface UIState {
   isStudentProfileModalOpen: boolean
   isSettingsModalOpen: boolean
   selectedStudentId: string | null
+  isVideoModalOpen: boolean
+  currentVideoId: string | null
+  currentVideoTitle: string
   
   // Modal actions
   openAddStudentModal: () => void
@@ -16,6 +19,8 @@ interface UIState {
   closeStudentProfileModal: () => void
   openSettingsModal: () => void
   closeSettingsModal: () => void
+  openVideoModal: (videoId: string, title: string) => void
+  closeVideoModal: () => void
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -25,6 +30,9 @@ export const useUIStore = create<UIState>((set) => ({
   isStudentProfileModalOpen: false,
   isSettingsModalOpen: false,
   selectedStudentId: null,
+  isVideoModalOpen: false,
+  currentVideoId: null,
+  currentVideoTitle: '',
   
   // Modal actions
   openAddStudentModal: () => {
@@ -61,5 +69,16 @@ export const useUIStore = create<UIState>((set) => ({
   closeSettingsModal: () => {
     console.log('🔒 Closing Settings Modal')
     set({ isSettingsModalOpen: false })
-  }
+  },
+  
+  openVideoModal: (videoId: string, title: string) => set({ 
+    isVideoModalOpen: true, 
+    currentVideoId: videoId,
+    currentVideoTitle: title 
+  }),
+  closeVideoModal: () => set({ 
+    isVideoModalOpen: false, 
+    currentVideoId: null,
+    currentVideoTitle: '' 
+  })
 })) 

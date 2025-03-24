@@ -16,7 +16,7 @@ if (!uri) {
   throw new Error('Please add your Mongo URI to .env.local')
 }
 
-console.log('MongoDB: Initializing connection with URI:', uri)
+console.info('📡 MongoDB: Connecting...')
 
 const options = {}
 
@@ -57,13 +57,13 @@ if (process.env.NODE_ENV === 'development') {
 
 export async function connectToDatabase() {
   try {
-    console.log('MongoDB: Attempting to connect...')
+    console.info('📡 MongoDB: Connecting...')
     if (!clientPromise) {
       throw new Error('MongoDB client promise is not initialized')
     }
     
     const client = await clientPromise
-    console.log('MongoDB: Connected successfully')
+    console.info('✅ MongoDB: Connected')
     const db = client.db('student-progress-tracker')
     
     // Test the connection
@@ -72,7 +72,7 @@ export async function connectToDatabase() {
     
     return { client, db }
   } catch (error) {
-    console.error('MongoDB: Failed to connect:', error)
+    console.error('❌ MongoDB: Connection failed:', error)
     throw error
   }
 }

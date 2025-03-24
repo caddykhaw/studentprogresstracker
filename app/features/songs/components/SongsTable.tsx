@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Music4, ArrowUpDown, Eye } from 'lucide-react'
+import { Search, Music4, ArrowUpDown } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { useSongStore } from '@/store/useSongStore'
 import { useUIStore } from '@/store/useUIStore'
@@ -51,17 +51,7 @@ export default function SongsTable() {
         console.error('Table: Error fetching songs:', err)
       })
     }
-  }, []) // Empty dependency array ensures this runs once on mount
-  
-  // Debug log when songs change
-  useEffect(() => {
-    console.log('Table: Songs data changed:', {
-      songsLength: songs?.length || 0,
-      isLoading,
-      error,
-      hasFetched: mounted.current
-    })
-  }, [songs, isLoading, error])
+  }, [fetchSongs])
 
   const handleSort = (field: keyof Song) => {
     if (sortField === field) {
@@ -209,7 +199,6 @@ export default function SongsTable() {
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                             className="w-full h-full"
-                            onClick={(e) => e.stopPropagation()}
                           />
                         </div>
                       ) : (

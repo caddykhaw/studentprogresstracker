@@ -28,7 +28,6 @@ export default function SongDetailModal() {
   const { 
     isSongDetailModalOpen, 
     closeSongDetailModal, 
-    openSongModal,
     setSongModalOpen,
     setSongDetailModalOpen
   } = useUIStore()
@@ -36,11 +35,13 @@ export default function SongDetailModal() {
   const currentSong = songs.find(s => s.id === currentSongId)
 
   const handleEdit = () => {
-    // Open edit modal without closing the detail modal
+    console.log('🔵 Edit button clicked')
     setSongModalOpen(true)
+    handleClose()
   }
 
   const handleClose = () => {
+    console.log('🔴 handleClose called')
     closeSongDetailModal()
   }
 
@@ -54,6 +55,7 @@ export default function SongDetailModal() {
       onClose={handleClose}
       title="Song Details"
       size="xl"
+      isStacked={true}
     >
       <div className="flex gap-6">
         {/* Left Column - Song Details and Teaching History */}
@@ -105,13 +107,7 @@ export default function SongDetailModal() {
         {/* Right Column - YouTube Video */}
         <div className="flex-1">
           {videoId ? (
-            <div 
-              className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800" 
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
+            <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
               <iframe
                 src={`https://www.youtube.com/embed/${videoId}`}
                 title={`${currentSong.title} by ${currentSong.artist}`}

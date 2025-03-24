@@ -1,3 +1,8 @@
+import NodeCache from 'node-cache'
+
+const DEFAULT_CACHE_DURATION = 5 * 60 // 5 minutes in seconds
+const cache = new NodeCache()
+
 // Cache service interface and implementation
 
 // Cache interface
@@ -26,7 +31,10 @@ export class MemoryCacheService implements CacheService {
   get<T>(key: string): T | null {
     const item = this.cache[key];
     
-    if (!item) return null;
+    if (!item) {
+      console.debug(`Cache miss: ${key}`);
+      return null;
+    }
     
     // Check if cache expired
     if (Date.now() > item.expiresAt) {
@@ -88,5 +96,28 @@ export class CacheFactory {
       }
     }
     return this.clientCache;
+  }
+}
+
+export const cacheService = {
+  get: (key: string) => {
+    const item = cache.get(key)
+    if (!item) {
+      console.debug(`Cache miss: ${key}`)
+      return null
+    }
+    return item
+  },
+
+  set: (key: string, value: any, duration: number = DEFAULT_CACHE_DURATION) => {
+    cache.set(key, value, duration)
+  },
+
+  invalidate: (key: string) => {
+    cache.del(key)
+  },
+
+  invalidateAll: () => {
+    cache.clear()
   }
 } 

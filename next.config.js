@@ -9,6 +9,10 @@ const nextConfig = {
     // https://nextjs.org/docs/architecture/nextjs-compiler#suppressing-errors
     reactRemoveProperties: { properties: ['^cz-shortcut-listen$'] },
   },
+  // Server configuration
+  httpAgentOptions: {
+    keepAlive: true,
+  }
 }
 
 module.exports = nextConfig 

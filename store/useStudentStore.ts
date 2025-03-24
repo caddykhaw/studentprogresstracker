@@ -90,8 +90,9 @@ export const useStudentStore = create<StudentState>()(
             },
             instrumentsLoading: false
           }));
+          console.info('🎸 Loaded instruments:', instruments.length)
         } catch (error) {
-          console.error('❌ Error fetching instruments:', error);
+          console.error('❌ Failed to load instruments:', error);
           set({ instrumentsLoading: false });
           throw error;
         }
@@ -117,8 +118,9 @@ export const useStudentStore = create<StudentState>()(
           }
           
           set({ students, isLoading: false });
+          console.info('📚 Loaded students:', students.length)
         } catch (error) {
-          console.error('❌ Error fetching students:', error);
+          console.error('❌ Failed to load students:', error);
           set({ isLoading: false });
           throw error;
         }
@@ -187,7 +189,7 @@ export const useStudentStore = create<StudentState>()(
             return { students: newStudents };
           });
         } catch (error) {
-          console.error('Failed to add note:', error);
+          console.error('❌ Failed to add note:', { studentId, error });
           throw error;
         }
       },

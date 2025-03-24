@@ -27,59 +27,33 @@ export class CachedClientSongService implements ClientSongService {
   }
 
   async getSongs(): Promise<Song[]> {
-    // Check cache first
-    const cacheKey = API_ENDPOINTS.SONGS.ALL;
-    const cachedResponse = this.cacheService.get<ApiResponse<Song[]>>(cacheKey);
-    
-    if (cachedResponse?.data) {
-      console.log('Client: Using cached songs data');
-      return cachedResponse.data;
+    try {
+      console.info('🎵 Fetching songs from API')
+      const response = await fetch('/api/songs')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      return data.songs
+    } catch (error) {
+      console.error('❌ Failed to fetch songs:', error)
+      throw error
     }
-
-    // Fetch from API
-    console.log('Client: Fetching songs from API');
-    const response = await fetch(cacheKey);
-    
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json() as ApiResponse<Song[]>;
-    
-    // Cache the result
-    this.cacheService.set(cacheKey, data);
-    
-    return data.data || [];
   }
 
   async getSong(id: string): Promise<Song | null> {
-    // Check cache first
-    const cacheKey = API_ENDPOINTS.SONGS.BY_ID(id);
-    const cachedResponse = this.cacheService.get<ApiResponse<Song>>(cacheKey);
-    
-    if (cachedResponse?.data) {
-      console.log(`Client: Using cached song data for id ${id}`);
-      return cachedResponse.data;
+    try {
+      console.info(`🎵 Fetching song ${id} from API`)
+      const response = await fetch(`/api/songs/${id}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      return data.song
+    } catch (error) {
+      console.error('❌ Failed to fetch song:', { id, error })
+      throw error
     }
-
-    // Fetch from API
-    console.log(`Client: Fetching song from API for id ${id}`);
-    const response = await fetch(cacheKey);
-    
-    if (response.status === 404) {
-      return null;
-    }
-    
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json() as ApiResponse<Song>;
-    
-    // Cache the result
-    this.cacheService.set(cacheKey, data);
-    
-    return data.data || null;
   }
 
   async createSong(songData: Omit<Song, 'id' | 'createdAt' | 'updatedAt'>): Promise<Song> {
